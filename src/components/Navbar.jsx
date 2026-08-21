@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Compass, PhoneCall, Menu, X, ChevronRight, Home, Landmark, Trees, ShieldCheck, MapPin } from 'lucide-react';
 
-export default function Navbar({ activeView, setActiveView, onOpenInquiry, activeCategory, setActiveCategory }) {
+export default function Navbar({ activeView, setActiveView, onOpenInquiry, activeCategory, setActiveCategory, onDoubleClickLogo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -30,8 +30,16 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
     <header className={`navbar-wrapper ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
         <div className="navbar-inner">
-          {/* Brand Logo */}
-          <div className="navbar-brand" onClick={() => handleNavClick('home')}>
+          {/* Brand Logo - Single click goes home, Double-click opens Admin Login */}
+          <div 
+            className="navbar-brand" 
+            onClick={() => handleNavClick('home')}
+            onDoubleClick={(e) => {
+              e.preventDefault();
+              if (onDoubleClickLogo) onDoubleClickLogo();
+            }}
+            title="Aurelia Luxury Estates (Admin: Double-click to access console)"
+          >
             <div className="brand-icon-wrap">
               <span className="brand-monogram">A</span>
             </div>

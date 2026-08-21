@@ -15,11 +15,17 @@ import PropertyDetailModal from './components/PropertyDetailModal';
 import PropertiesCatalog from './views/PropertiesCatalog';
 import LocationsView from './views/LocationsView';
 import InvestmentsView from './views/InvestmentsView';
-import { PROPERTIES_DATA } from './data/properties';
+import AdminLogin from './admin/AdminLogin';
+import AdminDashboard from './admin/AdminDashboard';
+import { getStoredProperties } from './data/propertyStore';
 import { Sparkles, MessageSquare } from 'lucide-react';
 
 export default function App() {
-  // Navigation & View State
+  // Admin Mode States
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+
+  // Customer Navigation & View State
   const [activeView, setActiveView] = useState('home'); // 'home' | 'properties' | 'locations' | 'investments'
   const [activeCategory, setActiveCategory] = useState(null); // 'Residence' | 'Plots' | 'Commercial' | null
   const [activeLocation, setActiveLocation] = useState(null); // 'Gurgaon' | 'Delhi' | null
@@ -29,6 +35,13 @@ export default function App() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [inquiryInitialData, setInquiryInitialData] = useState(null);
+
+  // Stored properties (synced with admin management store)
+  const [propertiesList, setPropertiesList] = useState([]);
+
+  useEffect(() => {
+    setPropertiesList(getStoredProperties());
+  }, [isAdminDashboardOpen]);
 
   // Handle Search from Hero
   const handleHeroSearch = ({ location, type, budget }) => {
@@ -83,6 +96,56 @@ export default function App() {
     setSelectedProperty(property);
   };
 
+  // Admin Triggers
+  const handleLogoDoubleClick = () => {
+    setIsAdminLoginOpen(true);
+    setIsAdminDashboardOpen(false);
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setIsAdminLoginOpen(false);
+    setIsAdminDashboardOpen(true);
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminDashboardOpen(false);
+    setIsAdminLoginOpen(true);
+  };
+
+  const handleReturnToCustomerSite = () => {
+    setIsAdminLoginOpen(false);
+    setIsAdminDashboardOpen(false);
+    setPropertiesList(getStoredProperties());
+  };
+
+  const handleAdminViewCustomerProperty = (prop) => {
+    setIsAdminDashboardOpen(false);
+    setIsAdminLoginOpen(false);
+    setSelectedProperty(prop);
+  };
+
+  // IF IN ADMIN LOGIN MODE
+  if (isAdminLoginOpen) {
+    return (
+      <AdminLogin 
+        onLoginSuccess={handleAdminLoginSuccess}
+        onBackToSite={handleReturnToCustomerSite}
+      />
+    );
+  }
+
+  // IF IN ADMIN DASHBOARD MODE
+  if (isAdminDashboardOpen) {
+    return (
+      <AdminDashboard 
+        onLogout={handleAdminLogout}
+        onViewCustomerSite={handleReturnToCustomerSite}
+        onViewCustomerProperty={handleAdminViewCustomerProperty}
+      />
+    );
+  }
+
+  // STANDARD APPROVED CUSTOMER-FACING FRONTEND
   return (
     <div className="app-layout">
       {/* Sticky Navigation */}
@@ -92,6 +155,7 @@ export default function App() {
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
         onOpenInquiry={handleOpenInquiry}
+        onDoubleClickLogo={handleLogoDoubleClick}
       />
 
       {/* Main View Router */}
@@ -116,7 +180,7 @@ export default function App() {
 
             {/* 4. Featured Properties */}
             <FeaturedProperties 
-              properties={PROPERTIES_DATA}
+              properties={propertiesList}
               onSelectProperty={handleSelectProperty}
               onViewAll={handleViewAllProperties}
             />
@@ -147,7 +211,7 @@ export default function App() {
 
         {activeView === 'properties' && (
           <PropertiesCatalog 
-            properties={PROPERTIES_DATA}
+            properties={propertiesList}
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
             activeLocation={activeLocation}
