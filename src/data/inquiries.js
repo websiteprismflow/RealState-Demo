@@ -151,6 +151,10 @@ export async function saveInquiry(inquiryData) {
     return { success: false, error: 'Please provide both your name and phone number.' };
   }
 
+  const enrichedRequirements = property_title 
+    ? (requirements ? `${requirements} (Property: ${property_title})` : `Inquired for: ${property_title}`)
+    : requirements;
+
   const newInquiry = {
     id: 'lead-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4),
     name,
@@ -161,7 +165,7 @@ export async function saveInquiry(inquiryData) {
     budget,
     timeline,
     purpose,
-    requirements,
+    requirements: enrichedRequirements,
     property_id,
     property_title,
     created_at: new Date().toISOString(),
@@ -170,11 +174,26 @@ export async function saveInquiry(inquiryData) {
 
   try {
     if (isSupabaseConfigured()) {
+      // Direct insertion conforming cleanly to standard Supabase columns
+      const dbRecord = {
+        name,
+        phone,
+        email: email || null,
+        property_type,
+        location,
+        budget,
+        timeline,
+        purpose,
+        requirements: enrichedRequirements,
+        property_id: property_id || null,
+        status: 'Pending'
+      };
+
       const { data, error } = await supabase
         .from('leads')
-        .insert([newInquiry])
+        .insert([dbRecord])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.warn('[Leads] Supabase insert warning (falling back to cache):', error.message);

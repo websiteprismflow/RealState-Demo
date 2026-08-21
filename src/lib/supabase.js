@@ -1,27 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Resolve environment variables safely across Vite and Next/Process environments
-const getEnvVar = (key) => {
-  if (typeof process !== 'undefined' && process.env && process.env[key]) {
-    return process.env[key];
-  }
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
-    return import.meta.env[key];
-  }
-  return '';
-};
+// Direct static access so Vite/Next bundlers can statically replace environment variables
+const supabaseUrl = 
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.NEXT_PUBLIC_SUPABASE_URL) ||
+  (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPABASE_URL) ||
+  'https://kviyodhtxtuzpwgrdouc.supabase.co';
 
-const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-const supabasePublishableKey = getEnvVar('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+const supabasePublishableKey = 
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) ||
+  (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) ||
+  'sb_publishable_N0m40eLClVG44SL5S8aWog_UfLdfBBD';
 
 export const isSupabaseConfigured = () => {
-  return Boolean(supabaseUrl && supabasePublishableKey);
+  return Boolean(
+    supabaseUrl && 
+    supabaseUrl !== 'https://placeholder.supabase.co' &&
+    supabasePublishableKey && 
+    supabasePublishableKey !== 'placeholder-anon-key'
+  );
 };
 
 // Initialize Browser-Safe Public Client (Uses only public publishable key, enforces RLS)
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabasePublishableKey || 'placeholder-anon-key',
+  supabaseUrl,
+  supabasePublishableKey,
   {
     auth: {
       persistSession: true,
@@ -51,7 +53,6 @@ export async function recordAuditLog({ action, entityType, entityId, metadata = 
     ]);
 
     if (error) {
-      // Non-blocking warning: table may not have been migrated yet
       console.warn('[Audit Log] Notice:', error.message);
     }
   } catch (err) {
