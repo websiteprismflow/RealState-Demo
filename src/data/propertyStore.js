@@ -1,7 +1,11 @@
 import { PROPERTIES_DATA } from './properties';
+import { supabase, isSupabaseConfigured, recordAuditLog } from '../lib/supabase';
 
 const PROPERTY_STORAGE_KEY = 'aurelia_admin_properties';
 
+/**
+ * Synchronously retrieves properties from local memory/cache
+ */
 export function getStoredProperties() {
   try {
     const raw = localStorage.getItem(PROPERTY_STORAGE_KEY);
@@ -16,50 +20,116 @@ export function getStoredProperties() {
   }
 }
 
-export function saveNewProperty(propertyData) {
-  try {
-    const properties = getStoredProperties();
-    const newProperty = {
-      id: 'prop-' + Date.now().toString().slice(-6),
-      title: propertyData.title || 'Untitled Luxury Asset',
-      type: propertyData.type || 'Residence',
-      categoryKey: (propertyData.type || 'residence').toLowerCase(),
-      location: propertyData.location || 'Gurgaon',
-      subLocation: propertyData.subLocation || propertyData.address || '',
-      address: propertyData.address || '',
-      price: propertyData.price || 'Price on Request',
-      priceRaw: Number(propertyData.priceRaw) || 10000000,
-      area: propertyData.area || '',
-      bedrooms: propertyData.bedrooms || '',
-      bathrooms: propertyData.bathrooms || '',
-      furnishing: propertyData.furnishing || 'Fully Furnished',
-      plotSize: propertyData.plotSize || '',
-      facing: propertyData.facing || 'North-East',
-      commercialType: propertyData.commercialType || '',
-      floor: propertyData.floor || '',
-      totalFloors: propertyData.totalFloors || '',
-      parking: propertyData.parking || '',
-      badge: propertyData.badge || (propertyData.featured ? 'Featured' : 'Verified'),
-      status: propertyData.status || 'Available',
-      featured: Boolean(propertyData.featured),
-      isInvestment: Boolean(propertyData.isInvestment),
-      expectedYield: propertyData.expectedYield || '',
-      shortDescription: propertyData.shortDescription || '',
-      description: propertyData.description || '',
-      features: Array.isArray(propertyData.features) ? propertyData.features : [],
-      amenities: Array.isArray(propertyData.amenities) ? propertyData.amenities : [],
-      images: Array.isArray(propertyData.images) && propertyData.images.length > 0 
-        ? propertyData.images 
-        : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80'],
-      videos: Array.isArray(propertyData.videos) ? propertyData.videos : [],
-      developer: propertyData.developer || 'Aurelia Signature Estates',
-      possession: propertyData.possession || 'Ready to Move',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+/**
+ * Fetches live properties from Supabase `public.properties`
+ * Falls back to default catalog if table is empty or offline
+ */
+export async function fetchLiveProperties() {
+  if (!isSupabaseConfigured()) {
+    return getStoredProperties();
+  }
 
-    const updated = [newProperty, ...properties];
+  try {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('[Properties] Supabase query notice:', error.message);
+      return getStoredProperties();
+    }
+
+    if (data && data.length > 0) {
+      // Normalize schema fields if required
+      const normalized = data.map(item => ({
+        ...item,
+        images: Array.isArray(item.images) ? item.images : (item.images ? [item.images] : []),
+        videos: Array.isArray(item.videos) ? item.videos : [],
+        features: Array.isArray(item.features) ? item.features : [],
+        amenities: Array.isArray(item.amenities) ? item.amenities : [],
+      }));
+
+      localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(normalized));
+      return normalized;
+    }
+
+    return getStoredProperties();
+  } catch (err) {
+    console.error('[Properties] Fetch error:', err);
+    return getStoredProperties();
+  }
+}
+
+/**
+ * Saves a new property to Supabase and updates local cache
+ */
+export async function saveNewProperty(propertyData) {
+  const newProperty = {
+    id: 'prop-' + Date.now().toString().slice(-6),
+    title: (propertyData.title || '').trim() || 'Untitled Luxury Asset',
+    type: propertyData.type || 'Residence',
+    categoryKey: (propertyData.type || 'residence').toLowerCase(),
+    location: propertyData.location || 'Gurgaon',
+    subLocation: propertyData.subLocation || propertyData.address || '',
+    address: propertyData.address || '',
+    price: propertyData.price || 'Price on Request',
+    priceRaw: Number(propertyData.priceRaw) || 10000000,
+    area: propertyData.area || '',
+    bedrooms: propertyData.bedrooms || '',
+    bathrooms: propertyData.bathrooms || '',
+    furnishing: propertyData.furnishing || 'Fully Furnished',
+    plotSize: propertyData.plotSize || '',
+    facing: propertyData.facing || 'North-East',
+    commercialType: propertyData.commercialType || '',
+    floor: propertyData.floor || '',
+    totalFloors: propertyData.totalFloors || '',
+    parking: propertyData.parking || '',
+    badge: propertyData.badge || (propertyData.featured ? 'Featured' : 'Verified'),
+    status: propertyData.status || 'Available',
+    featured: Boolean(propertyData.featured),
+    isInvestment: Boolean(propertyData.isInvestment),
+    expectedYield: propertyData.expectedYield || '',
+    shortDescription: propertyData.shortDescription || '',
+    description: propertyData.description || '',
+    features: Array.isArray(propertyData.features) ? propertyData.features : [],
+    amenities: Array.isArray(propertyData.amenities) ? propertyData.amenities : [],
+    images: Array.isArray(propertyData.images) && propertyData.images.length > 0 
+      ? propertyData.images 
+      : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80'],
+    videos: Array.isArray(propertyData.videos) ? propertyData.videos : [],
+    developer: propertyData.developer || 'Aurelia Signature Estates',
+    possession: propertyData.possession || 'Ready to Move',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert([newProperty])
+        .select()
+        .single();
+
+      if (error) {
+        console.warn('[Properties] Supabase insert warning (falling back to cache):', error.message);
+      } else if (data) {
+        newProperty.id = data.id || newProperty.id;
+      }
+    }
+
+    await recordAuditLog({
+      action: 'PROPERTY_CREATED',
+      entityType: 'PROPERTY',
+      entityId: newProperty.id,
+      metadata: { title: newProperty.title, price: newProperty.price, location: newProperty.location },
+    });
+
+    const current = getStoredProperties();
+    const updated = [newProperty, ...current];
     localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(updated));
+
     return { success: true, property: newProperty, properties: updated };
   } catch (err) {
     console.error('Error saving property:', err);
@@ -67,19 +137,42 @@ export function saveNewProperty(propertyData) {
   }
 }
 
-export function updateExistingProperty(propertyId, propertyData) {
+/**
+ * Updates an existing property in Supabase and local cache
+ */
+export async function updateExistingProperty(propertyId, propertyData) {
   try {
-    const properties = getStoredProperties();
-    const updated = properties.map(prop => {
+    const updatePayload = {
+      ...propertyData,
+      updated_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('properties')
+        .update(updatePayload)
+        .eq('id', propertyId);
+
+      if (error) {
+        console.warn('[Properties] Supabase update warning:', error.message);
+      }
+    }
+
+    await recordAuditLog({
+      action: 'PROPERTY_UPDATED',
+      entityType: 'PROPERTY',
+      entityId: propertyId,
+      metadata: updatePayload,
+    });
+
+    const current = getStoredProperties();
+    const updated = current.map(prop => {
       if (prop.id === propertyId) {
-        return {
-          ...prop,
-          ...propertyData,
-          updated_at: new Date().toISOString()
-        };
+        return { ...prop, ...updatePayload };
       }
       return prop;
     });
+
     localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(updated));
     return { success: true, properties: updated };
   } catch (err) {
@@ -88,11 +181,32 @@ export function updateExistingProperty(propertyId, propertyData) {
   }
 }
 
-export function deleteExistingProperty(propertyId) {
+/**
+ * Deletes a property in Supabase and local cache
+ */
+export async function deleteExistingProperty(propertyId) {
   try {
-    const properties = getStoredProperties();
-    const updated = properties.filter(prop => prop.id !== propertyId);
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId);
+
+      if (error) {
+        console.warn('[Properties] Supabase delete warning:', error.message);
+      }
+    }
+
+    await recordAuditLog({
+      action: 'PROPERTY_DELETED',
+      entityType: 'PROPERTY',
+      entityId: propertyId,
+    });
+
+    const current = getStoredProperties();
+    const updated = current.filter(prop => prop.id !== propertyId);
     localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(updated));
+
     return { success: true, properties: updated };
   } catch (err) {
     console.error('Error deleting property:', err);

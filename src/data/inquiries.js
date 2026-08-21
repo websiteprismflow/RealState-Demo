@@ -1,4 +1,4 @@
-// Lead & Inquiry Storage Layer (Mirrors future Supabase table `inquiries`)
+import { supabase, isSupabaseConfigured, recordAuditLog } from '../lib/supabase';
 
 const STORAGE_KEY = 'aurelia_leads_inquiries';
 
@@ -99,28 +99,94 @@ export function getSavedInquiries() {
   }
 }
 
-export function saveInquiry(inquiryData) {
-  try {
-    const existing = getSavedInquiries();
-    const newInquiry = {
-      id: 'lead-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4),
-      name: inquiryData.name || '',
-      phone: inquiryData.phone || '',
-      email: inquiryData.email || '',
-      property_type: inquiryData.property_type || 'Residence',
-      location: inquiryData.location || 'Any / All Locations',
-      budget: inquiryData.budget || 'Flexible',
-      timeline: inquiryData.timeline || 'Immediate (0-1 Month)',
-      purpose: inquiryData.purpose || 'Self Use',
-      requirements: inquiryData.requirements || '',
-      property_id: inquiryData.property_id || null,
-      property_title: inquiryData.property_title || null,
-      created_at: new Date().toISOString(),
-      status: 'Pending'
-    };
+/**
+ * Fetches real leads from Supabase `public.leads` for authorized administrators
+ */
+export async function fetchLiveLeads() {
+  if (!isSupabaseConfigured()) {
+    return getSavedInquiries();
+  }
 
+  try {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('[Leads] Supabase query notice:', error.message);
+      return getSavedInquiries();
+    }
+
+    if (data && data.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return data;
+    }
+
+    return getSavedInquiries();
+  } catch (err) {
+    console.error('[Leads] Fetch error:', err);
+    return getSavedInquiries();
+  }
+}
+
+/**
+ * Validates, sanitizes, and submits a customer inquiry to Supabase `public.leads`
+ */
+export async function saveInquiry(inquiryData) {
+  // 1. Validation & Input Sanitization
+  const name = String(inquiryData.name || '').trim().slice(0, 100);
+  const phone = String(inquiryData.phone || '').trim().slice(0, 20);
+  const email = String(inquiryData.email || '').trim().slice(0, 100);
+  const property_type = String(inquiryData.property_type || 'Residence').trim().slice(0, 50);
+  const location = String(inquiryData.location || 'Any / All Locations').trim().slice(0, 100);
+  const budget = String(inquiryData.budget || 'Flexible').trim().slice(0, 50);
+  const timeline = String(inquiryData.timeline || 'Immediate (0-1 Month)').trim().slice(0, 50);
+  const purpose = String(inquiryData.purpose || 'Self Use').trim().slice(0, 50);
+  const requirements = String(inquiryData.requirements || '').trim().slice(0, 1000);
+  const property_id = inquiryData.property_id ? String(inquiryData.property_id).slice(0, 50) : null;
+  const property_title = inquiryData.property_title ? String(inquiryData.property_title).slice(0, 200) : null;
+
+  if (!name || !phone) {
+    return { success: false, error: 'Please provide both your name and phone number.' };
+  }
+
+  const newInquiry = {
+    id: 'lead-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4),
+    name,
+    phone,
+    email,
+    property_type,
+    location,
+    budget,
+    timeline,
+    purpose,
+    requirements,
+    property_id,
+    property_title,
+    created_at: new Date().toISOString(),
+    status: 'Pending'
+  };
+
+  try {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([newInquiry])
+        .select()
+        .single();
+
+      if (error) {
+        console.warn('[Leads] Supabase insert warning (falling back to cache):', error.message);
+      } else if (data) {
+        newInquiry.id = data.id || newInquiry.id;
+      }
+    }
+
+    const existing = getSavedInquiries();
     const updated = [newInquiry, ...existing];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
     return { success: true, inquiry: newInquiry };
   } catch (err) {
     console.error('Error saving inquiry:', err);
@@ -128,8 +194,29 @@ export function saveInquiry(inquiryData) {
   }
 }
 
-export function updateLeadStatus(leadId, newStatus) {
+/**
+ * Updates lead status in Supabase and local cache
+ */
+export async function updateLeadStatus(leadId, newStatus) {
   try {
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', leadId);
+
+      if (error) {
+        console.warn('[Leads] Supabase status update warning:', error.message);
+      }
+    }
+
+    await recordAuditLog({
+      action: 'LEAD_STATUS_CHANGED',
+      entityType: 'LEAD',
+      entityId: leadId,
+      metadata: { newStatus },
+    });
+
     const existing = getSavedInquiries();
     const updated = existing.map(lead => 
       lead.id === leadId ? { ...lead, status: newStatus, updated_at: new Date().toISOString() } : lead
@@ -142,8 +229,28 @@ export function updateLeadStatus(leadId, newStatus) {
   }
 }
 
-export function deleteLead(leadId) {
+/**
+ * Deletes lead from Supabase and local cache
+ */
+export async function deleteLead(leadId) {
   try {
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .eq('id', leadId);
+
+      if (error) {
+        console.warn('[Leads] Supabase delete warning:', error.message);
+      }
+    }
+
+    await recordAuditLog({
+      action: 'LEAD_DELETED',
+      entityType: 'LEAD',
+      entityId: leadId,
+    });
+
     const existing = getSavedInquiries();
     const updated = existing.filter(lead => lead.id !== leadId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
