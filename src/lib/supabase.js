@@ -72,6 +72,7 @@ export async function checkAdminUser(userId) {
   }
 
   try {
+    // 1. Primary check: Query public.admin_users by exact user_id UUID and enabled = true
     const { data: admin, error: adminError } = await supabase
       .from('admin_users')
       .select('user_id, role, enabled')
@@ -80,29 +81,57 @@ export async function checkAdminUser(userId) {
       .maybeSingle();
 
     if (adminError) {
-      console.error('[Supabase RLS/admin_users query error]:', adminError.message, adminError);
+      console.error('[Supabase admin_users query error]:', adminError.message, adminError);
+    }
+
+    if (admin) {
+      console.log('[Supabase Authorization Success]: Admin record verified for UUID:', userId, 'Role:', admin.role);
       return { 
-        isAdmin: false, 
-        role: null, 
-        enabled: false, 
-        error: `Database authorization error: ${adminError.message}` 
+        isAdmin: true, 
+        role: admin.role || 'owner', 
+        enabled: true 
       };
     }
 
-    if (!admin) {
-      console.warn(`[admin_users Lookup] No active enabled admin record found for user_id: ${userId}`);
-      return { 
-        isAdmin: false, 
-        role: null, 
-        enabled: false, 
-        error: 'Your account does not have administrator access.' 
+    // 2. Check if admin record exists but is disabled (enabled = false)
+    const { data: disabledCheck } = await supabase
+      .from('admin_users')
+      .select('user_id, role, enabled')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (disabledCheck) {
+      if (disabledCheck.enabled !== true) {
+        return {
+          isAdmin: false,
+          role: disabledCheck.role,
+          enabled: false,
+          error: 'Your administrator account has been disabled.'
+        };
+      }
+      return {
+        isAdmin: true,
+        role: disabledCheck.role || 'owner',
+        enabled: true
       };
     }
 
+    // 3. Check for security definer RPC function if defined in Supabase
+    try {
+      const { data: rpcResult } = await supabase.rpc('is_admin');
+      if (rpcResult === true) {
+        return { isAdmin: true, role: 'owner', enabled: true };
+      }
+    } catch {
+      // RPC check is optional
+    }
+
+    console.warn(`[admin_users Lookup] No admin_users row found for user_id: ${userId}`);
     return { 
-      isAdmin: true, 
-      role: admin.role || 'owner', 
-      enabled: true 
+      isAdmin: false, 
+      role: null, 
+      enabled: false, 
+      error: 'Your account does not have administrator access.' 
     };
   } catch (err) {
     console.error('Error verifying admin user:', err);
@@ -146,7 +175,7 @@ export async function loginAdminWithSupabase(email, password) {
     const user = data.user;
     const session = data.session;
 
-    // Safe development diagnostic (no tokens or credentials logged)
+    // Safe development diagnostic
     console.log('[Supabase Auth Success]', {
       hasSession: Boolean(session),
       hasUser: Boolean(user),
