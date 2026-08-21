@@ -29,6 +29,7 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     },
   }
 );
@@ -125,8 +126,8 @@ export async function loginAdminWithSupabase(email, password) {
   }
 
   try {
-    // 1. Authenticate with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    // 1. Direct Authenticate with Supabase Auth
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
     });
@@ -136,19 +137,28 @@ export async function loginAdminWithSupabase(email, password) {
       return { success: false, error: authError.message || 'Invalid login credentials.' };
     }
 
-    // 2. Retrieve the authenticated user using supabase.auth.getUser()
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.warn('[Supabase getUser Error]:', userError?.message);
-      return { success: false, error: 'Authentication failed to retrieve user session.' };
+    // 2. Directly verify user and session from signInWithPassword response
+    if (!data || !data.user || !data.session) {
+      console.warn('[Supabase Auth Response Warning]: signInWithPassword did not return a session/user object.');
+      return { success: false, error: 'Authentication did not produce a usable session.' };
     }
 
-    // 3. Query public.admin_users using the exact user.id (UUID)
+    const user = data.user;
+    const session = data.session;
+
+    // Safe development diagnostic (no tokens or credentials logged)
+    console.log('[Supabase Auth Success]', {
+      hasSession: Boolean(session),
+      hasUser: Boolean(user),
+      userId: user.id,
+      email: user.email,
+    });
+
+    // 3. Query public.admin_users using the authenticated user's exact UUID (user.id)
     const adminCheck = await checkAdminUser(user.id);
 
     if (!adminCheck.isAdmin) {
-      // User is in Auth but unauthorized or disabled in admin_users -> force sign out
+      // User is authenticated in Auth but unauthorized or disabled in admin_users -> force sign out
       await supabase.auth.signOut();
       return { 
         success: false, 
@@ -167,7 +177,7 @@ export async function loginAdminWithSupabase(email, password) {
     return {
       success: true,
       user: user,
-      session: authData.session,
+      session: session,
       adminRole: adminCheck.role,
     };
   } catch (err) {
@@ -199,20 +209,18 @@ export async function getValidatedAdminSession() {
   if (!isSupabaseConfigured()) return null;
 
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) return null;
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session || !session.user) return null;
 
-    const adminCheck = await checkAdminUser(user.id);
+    const adminCheck = await checkAdminUser(session.user.id);
     if (!adminCheck.isAdmin) {
       await supabase.auth.signOut();
       return null;
     }
 
-    const { data: { session } } = await supabase.auth.getSession();
-
     return {
       session,
-      user: user,
+      user: session.user,
       adminRole: adminCheck.role,
     };
   } catch (err) {
