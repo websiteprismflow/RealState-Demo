@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, ArrowLeft, Sparkles, AlertCircle } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { loginAdminWithSupabase } from '../lib/supabase';
 
 export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
-  const [email, setEmail] = useState('admin@gmail.com');
-  const [password, setPassword] = useState('admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -19,15 +20,20 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
 
     setIsLoading(true);
 
-    // Prototype UI authentication validation
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email.trim().toLowerCase() === 'admin@gmail.com' && password === 'admin') {
-        onLoginSuccess();
+    try {
+      // 1. Authenticate with Supabase Auth & Verify admin_users table role
+      const result = await loginAdminWithSupabase(email, password);
+
+      if (result.success) {
+        onLoginSuccess(result);
       } else {
-        setError('Invalid credentials. For this prototype, use admin@gmail.com / admin');
+        setError(result.error || 'Authentication failed. Please check your credentials.');
       }
-    }, 400);
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred during login.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,17 +63,8 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
 
           <h2 className="login-title">Admin Login</h2>
           <p className="login-desc">
-            Enter administrator credentials to access the lead engine and inventory management console.
+            Sign in with your authorized administrator account to access the lead engine and inventory management console.
           </p>
-
-          {/* Prototype credentials hint box */}
-          <div className="demo-credentials-box">
-            <div className="demo-badge">Prototype Access</div>
-            <div className="demo-creds-row">
-              <span>Email: <strong>admin@gmail.com</strong></span>
-              <span>Password: <strong>admin</strong></span>
-            </div>
-          </div>
 
           {error && (
             <div className="login-error-alert animate-fade-in">
@@ -84,9 +81,10 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
                 <input 
                   type="email" 
                   className="login-input"
-                  placeholder="admin@gmail.com"
+                  placeholder="admin@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -102,6 +100,7 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   required
                 />
                 <button 
@@ -121,7 +120,10 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <span>Authenticating...</span>
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Verifying Credentials...</span>
+                </>
               ) : (
                 <>
                   <span>Login to Console</span>
@@ -133,7 +135,7 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
 
           <div className="login-footer-disclaimer">
             <ShieldCheck size={15} className="text-gold" />
-            <span>Prototype Authentication Layer • Supabase Auth in Phase 2</span>
+            <span>Secured via Supabase Auth & Role-Based Access Control</span>
           </div>
         </div>
       </div>
@@ -235,31 +237,6 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
           margin-bottom: 20px;
         }
 
-        .demo-credentials-box {
-          background: var(--gold-tint-10);
-          border: 1px solid var(--gold-border);
-          border-radius: var(--radius-sm);
-          padding: 12px 16px;
-          margin-bottom: 22px;
-        }
-
-        .demo-badge {
-          font-size: 0.68rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--gold-dark);
-          margin-bottom: 4px;
-        }
-
-        .demo-creds-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          font-size: 0.82rem;
-          color: var(--text-charcoal-primary);
-        }
-
         .login-error-alert {
           display: flex;
           align-items: center;
@@ -272,6 +249,10 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
           font-size: 0.82rem;
           font-weight: 600;
           margin-bottom: 20px;
+        }
+
+        .error-icon {
+          flex-shrink: 0;
         }
 
         .login-form {
@@ -343,6 +324,15 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
           color: var(--text-muted-light);
           margin-top: 24px;
           text-align: center;
+        }
+
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

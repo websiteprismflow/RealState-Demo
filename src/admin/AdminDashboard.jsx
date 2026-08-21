@@ -13,7 +13,7 @@ import { getSavedInquiries, updateLeadStatus, deleteLead } from '../data/inquiri
 import { getStoredProperties, saveNewProperty, updateExistingProperty, deleteExistingProperty } from '../data/propertyStore';
 import './admin.css';
 
-export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCustomerProperty }) {
+export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCustomerProperty, adminUser }) {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'leads' | 'properties' | 'settings'
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -163,6 +163,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
         onClose={() => setSidebarOpen(false)}
         onLogout={onLogout}
         onViewCustomerSite={onViewCustomerSite}
+        adminUser={adminUser}
       />
 
       {/* Main Workspace */}
@@ -206,7 +207,7 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
           )}
 
           {activeTab === 'settings' && (
-            <AdminSettings onShowToast={showToast} />
+            <AdminSettings onShowToast={showToast} adminUser={adminUser} />
           )}
         </div>
       </div>

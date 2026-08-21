@@ -9,12 +9,16 @@ export default function AdminSidebar({
   isOpen, 
   onClose, 
   onLogout, 
-  onViewCustomerSite 
+  onViewCustomerSite,
+  adminUser
 }) {
   const handleNavClick = (tab) => {
     setActiveTab(tab);
     onClose();
   };
+
+  const displayName = adminUser?.email ? adminUser.email.split('@')[0] : 'Administrator';
+  const roleTitle = adminUser?.adminRole || 'Authorized Admin';
 
   return (
     <>
@@ -105,11 +109,13 @@ export default function AdminSidebar({
         <div className="sidebar-footer">
           <div className="admin-profile-badge">
             <div className="admin-avatar">
-              <span>A</span>
+              <span>{displayName.charAt(0).toUpperCase()}</span>
             </div>
-            <div>
-              <div className="admin-info-name">Administrator</div>
-              <div className="admin-info-role">Super Admin</div>
+            <div style={{ maxWidth: '140px', overflow: 'hidden' }}>
+              <div className="admin-info-name" title={adminUser?.email || 'Administrator'}>
+                {displayName}
+              </div>
+              <div className="admin-info-role">{roleTitle}</div>
             </div>
           </div>
 

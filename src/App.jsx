@@ -18,10 +18,12 @@ import InvestmentsView from './views/InvestmentsView';
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import { getStoredProperties } from './data/propertyStore';
-import { Sparkles, MessageSquare } from 'lucide-react';
+import { supabase, getValidatedAdminSession, logoutAdmin } from './lib/supabase';
+import { MessageSquare } from 'lucide-react';
 
 export default function App() {
-  // Admin Mode States
+  // Supabase Admin Authentication State
+  const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null); // { user, session, adminRole }
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
 
@@ -39,6 +41,53 @@ export default function App() {
   // Stored properties (synced with admin management store)
   const [propertiesList, setPropertiesList] = useState([]);
 
+  // 1. Initial Session Verification & Route Protection
+  useEffect(() => {
+    async function verifyInitialSession() {
+      try {
+        const validated = await getValidatedAdminSession();
+        if (validated) {
+          setAuthenticatedAdmin(validated);
+          // If admin was active in dashboard before refresh, keep dashboard open
+          if (sessionStorage.getItem('aurelia_admin_active') === 'true') {
+            setIsAdminDashboardOpen(true);
+          }
+        } else {
+          setAuthenticatedAdmin(null);
+          setIsAdminDashboardOpen(false);
+          sessionStorage.removeItem('aurelia_admin_active');
+        }
+      } catch (err) {
+        console.error('Session check error:', err);
+      }
+    }
+
+    verifyInitialSession();
+
+    // Listen to Supabase Auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setAuthenticatedAdmin(null);
+        setIsAdminDashboardOpen(false);
+        sessionStorage.removeItem('aurelia_admin_active');
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        const validated = await getValidatedAdminSession();
+        if (validated) {
+          setAuthenticatedAdmin(validated);
+        } else {
+          setAuthenticatedAdmin(null);
+          setIsAdminDashboardOpen(false);
+          sessionStorage.removeItem('aurelia_admin_active');
+        }
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  // Update properties on mount and when returning from admin
   useEffect(() => {
     setPropertiesList(getStoredProperties());
   }, [isAdminDashboardOpen]);
@@ -96,25 +145,44 @@ export default function App() {
     setSelectedProperty(property);
   };
 
-  // Admin Triggers
-  const handleLogoDoubleClick = () => {
-    setIsAdminLoginOpen(true);
-    setIsAdminDashboardOpen(false);
+  // Admin Triggers & Authentication Handlers
+  const handleLogoDoubleClick = async () => {
+    // If already authenticated and verified as admin, open dashboard directly
+    const validated = await getValidatedAdminSession();
+    if (validated) {
+      setAuthenticatedAdmin(validated);
+      setIsAdminDashboardOpen(true);
+      setIsAdminLoginOpen(false);
+      sessionStorage.setItem('aurelia_admin_active', 'true');
+    } else {
+      setIsAdminLoginOpen(true);
+      setIsAdminDashboardOpen(false);
+    }
   };
 
-  const handleAdminLoginSuccess = () => {
+  const handleAdminLoginSuccess = (authResult) => {
+    setAuthenticatedAdmin({
+      user: authResult.user,
+      session: authResult.session,
+      adminRole: authResult.adminRole
+    });
     setIsAdminLoginOpen(false);
     setIsAdminDashboardOpen(true);
+    sessionStorage.setItem('aurelia_admin_active', 'true');
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    await logoutAdmin();
+    setAuthenticatedAdmin(null);
     setIsAdminDashboardOpen(false);
     setIsAdminLoginOpen(true);
+    sessionStorage.removeItem('aurelia_admin_active');
   };
 
   const handleReturnToCustomerSite = () => {
     setIsAdminLoginOpen(false);
     setIsAdminDashboardOpen(false);
+    sessionStorage.removeItem('aurelia_admin_active');
     setPropertiesList(getStoredProperties());
   };
 
@@ -124,7 +192,7 @@ export default function App() {
     setSelectedProperty(prop);
   };
 
-  // IF IN ADMIN LOGIN MODE
+  // 1. ADMIN LOGIN VIEW
   if (isAdminLoginOpen) {
     return (
       <AdminLogin 
@@ -134,18 +202,23 @@ export default function App() {
     );
   }
 
-  // IF IN ADMIN DASHBOARD MODE
-  if (isAdminDashboardOpen) {
+  // 2. PROTECTED ADMIN DASHBOARD VIEW (Requires valid authenticatedAdmin)
+  if (isAdminDashboardOpen && authenticatedAdmin) {
     return (
       <AdminDashboard 
         onLogout={handleAdminLogout}
         onViewCustomerSite={handleReturnToCustomerSite}
         onViewCustomerProperty={handleAdminViewCustomerProperty}
+        adminUser={{
+          email: authenticatedAdmin.user?.email,
+          role: authenticatedAdmin.adminRole,
+          userId: authenticatedAdmin.user?.id
+        }}
       />
     );
   }
 
-  // STANDARD APPROVED CUSTOMER-FACING FRONTEND
+  // 3. STANDARD APPROVED CUSTOMER-FACING FRONTEND
   return (
     <div className="app-layout">
       {/* Sticky Navigation */}
