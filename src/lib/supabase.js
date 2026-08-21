@@ -1,46 +1,44 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Resolve environment variables safely across Vite and Next/Process environments
-const getEnvVar = (key, viteKey) => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    if (import.meta.env[key]) return import.meta.env[key];
-    if (viteKey && import.meta.env[viteKey]) return import.meta.env[viteKey];
+// Resolve environment variables across Next.js and Vite environments
+const getEnvVar = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
   }
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env[key]) return process.env[key];
-    if (viteKey && process.env[viteKey]) return process.env[viteKey];
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+    return import.meta.env[key];
   }
   return '';
 };
 
-const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL', 'VITE_SUPABASE_URL') || 'https://placeholder.supabase.co';
-const supabaseAnonKey = getEnvVar('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY') || 'placeholder-anon-key';
+const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+const supabasePublishableKey = getEnvVar('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
 
 export const isSupabaseConfigured = () => {
-  return (
-    supabaseUrl && 
-    supabaseUrl !== 'https://placeholder.supabase.co' &&
-    supabaseAnonKey && 
-    supabaseAnonKey !== 'placeholder-anon-key'
-  );
+  return Boolean(supabaseUrl && supabasePublishableKey);
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+// Initialize Supabase Client
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabasePublishableKey || 'placeholder-anon-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
 
 /**
  * Verifies if the authenticated user exists in `public.admin_users` and has `enabled = true`
  * @param {string} userId - The Supabase auth user UUID
- * @returns {Promise<{ isAdmin: boolean, role: string|null, enabled: boolean, error?: string }>}
+ * @returns {Promise<{ isAdmin: boolean, role: string|null, enabled: boolean, error?: string, failureReason?: string }>}
  */
 export async function checkAdminUser(userId) {
   if (!userId) {
-    return { isAdmin: false, role: null, enabled: false, error: 'No user ID provided' };
+    return { isAdmin: false, role: null, enabled: false, error: 'No user ID provided', failureReason: 'INVALID_USER_ID' };
   }
 
   try {
@@ -48,25 +46,27 @@ export async function checkAdminUser(userId) {
       .from('admin_users')
       .select('user_id, role, enabled')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      console.warn('admin_users check error:', error.message);
-      return { isAdmin: false, role: null, enabled: false, error: error.message };
+      console.error('[Layer G: RLS/Database Error] admin_users check error:', error.message);
+      return { isAdmin: false, role: null, enabled: false, error: error.message, failureReason: 'DB_ERROR' };
     }
 
     if (!data) {
-      return { isAdmin: false, role: null, enabled: false, error: 'User not found in admin_users' };
+      console.warn('[Layer E: admin_users Row Missing] User authenticated in Auth but not in admin_users table.');
+      return { isAdmin: false, role: null, enabled: false, error: 'Your account does not have administrator access.', failureReason: 'ROW_MISSING' };
     }
 
     if (data.enabled !== true) {
-      return { isAdmin: false, role: data.role, enabled: false, error: 'Administrator account is disabled' };
+      console.warn('[Layer F: admin_users Disabled] Administrator account has enabled = false.');
+      return { isAdmin: false, role: data.role, enabled: false, error: 'Your administrator account has been disabled.', failureReason: 'ACCOUNT_DISABLED' };
     }
 
     return { isAdmin: true, role: data.role || 'Admin', enabled: true };
   } catch (err) {
-    console.error('Error verifying admin status:', err);
-    return { isAdmin: false, role: null, enabled: false, error: err.message };
+    console.error('[Layer G: Database Query Exception]', err);
+    return { isAdmin: false, role: null, enabled: false, error: err.message, failureReason: 'EXCEPTION' };
   }
 }
 
@@ -76,25 +76,28 @@ export async function checkAdminUser(userId) {
  * @param {string} password
  */
 export async function loginAdminWithSupabase(email, password) {
-  if (!email || !password) {
-    return { success: false, error: 'Please enter both email and password.' };
-  }
-
+  // Layer A: Environment Variables Check
   if (!isSupabaseConfigured()) {
+    console.error('[Layer A: Missing Env Variables] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is undefined.');
     return { 
       success: false, 
       error: 'Supabase environment variables are missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.' 
     };
   }
 
+  if (!email || !password) {
+    return { success: false, error: 'Please enter both email and password.' };
+  }
+
   try {
-    // 1. Authenticate with Supabase Auth
+    // Layer C & D: Supabase Auth Check
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password
     });
 
     if (authError) {
+      console.warn('[Layer C/D: Auth Failure]', authError.message);
       return { success: false, error: authError.message || 'Invalid login credentials.' };
     }
 
@@ -102,20 +105,16 @@ export async function loginAdminWithSupabase(email, password) {
       return { success: false, error: 'Authentication failed. Please try again.' };
     }
 
-    // 2. Check public.admin_users table
+    // Layer E & F: Role and Enabled Status Check in public.admin_users
     const adminCheck = await checkAdminUser(authData.user.id);
 
     if (!adminCheck.isAdmin) {
-      // User is authenticated in Supabase Auth, but NOT authorized in admin_users table
+      // Sign out unauthorized user from browser session
       await supabase.auth.signOut();
-      
-      if (adminCheck.enabled === false && adminCheck.role) {
-        return { success: false, error: 'Your administrator account has been disabled.' };
-      }
-      return { success: false, error: 'Your account does not have administrator access.' };
+      return { success: false, error: adminCheck.error || 'Your account does not have administrator access.' };
     }
 
-    // 3. Success - Authorized Admin
+    // Success - Fully Verified Administrator
     return {
       success: true,
       user: authData.user,
@@ -123,7 +122,7 @@ export async function loginAdminWithSupabase(email, password) {
       adminRole: adminCheck.role
     };
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('[Layer B: Supabase Client Exception]', err);
     return { success: false, error: err.message || 'An unexpected error occurred.' };
   }
 }
