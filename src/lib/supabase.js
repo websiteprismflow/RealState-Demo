@@ -61,8 +61,8 @@ export async function recordAuditLog({ action, entityType, entityId, metadata = 
 }
 
 /**
- * Verifies if the authenticated user exists in `public.admin_users` and has `enabled = true`
- * @param {string} userId - The Supabase auth user UUID
+ * Verifies if the authenticated user exists in `public.admin_users` with `enabled = true`
+ * @param {string} userId - The Supabase auth user UUID (auth.uid())
  * @returns {Promise<{ isAdmin: boolean, role: string|null, enabled: boolean, error?: string }>}
  */
 export async function checkAdminUser(userId) {
@@ -71,26 +71,38 @@ export async function checkAdminUser(userId) {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data: admin, error: adminError } = await supabase
       .from('admin_users')
       .select('user_id, role, enabled')
       .eq('user_id', userId)
+      .eq('enabled', true)
       .maybeSingle();
 
-    if (error) {
-      console.error('[admin_users query error]:', error.message);
-      return { isAdmin: false, role: null, enabled: false, error: error.message };
+    if (adminError) {
+      console.error('[Supabase RLS/admin_users query error]:', adminError.message, adminError);
+      return { 
+        isAdmin: false, 
+        role: null, 
+        enabled: false, 
+        error: `Database authorization error: ${adminError.message}` 
+      };
     }
 
-    if (!data) {
-      return { isAdmin: false, role: null, enabled: false, error: 'Your account does not have administrator access.' };
+    if (!admin) {
+      console.warn(`[admin_users Lookup] No active enabled admin record found for user_id: ${userId}`);
+      return { 
+        isAdmin: false, 
+        role: null, 
+        enabled: false, 
+        error: 'Your account does not have administrator access.' 
+      };
     }
 
-    if (data.enabled !== true) {
-      return { isAdmin: false, role: data.role, enabled: false, error: 'Your administrator account has been disabled.' };
-    }
-
-    return { isAdmin: true, role: data.role || 'admin', enabled: true };
+    return { 
+      isAdmin: true, 
+      role: admin.role || 'owner', 
+      enabled: true 
+    };
   } catch (err) {
     console.error('Error verifying admin user:', err);
     return { isAdmin: false, role: null, enabled: false, error: err.message };
@@ -120,33 +132,41 @@ export async function loginAdminWithSupabase(email, password) {
     });
 
     if (authError) {
+      console.warn('[Supabase Auth Sign-In Error]:', authError.message);
       return { success: false, error: authError.message || 'Invalid login credentials.' };
     }
 
-    if (!authData || !authData.user) {
-      return { success: false, error: 'Authentication failed. Please try again.' };
+    // 2. Retrieve the authenticated user using supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.warn('[Supabase getUser Error]:', userError?.message);
+      return { success: false, error: 'Authentication failed to retrieve user session.' };
     }
 
-    // 2. Check public.admin_users table
-    const adminCheck = await checkAdminUser(authData.user.id);
+    // 3. Query public.admin_users using the exact user.id (UUID)
+    const adminCheck = await checkAdminUser(user.id);
 
     if (!adminCheck.isAdmin) {
-      // User is in Auth but unauthorized in admin_users -> force sign out
+      // User is in Auth but unauthorized or disabled in admin_users -> force sign out
       await supabase.auth.signOut();
-      return { success: false, error: adminCheck.error || 'Your account does not have administrator access.' };
+      return { 
+        success: false, 
+        error: adminCheck.error || 'Your account does not have administrator access.' 
+      };
     }
 
-    // 3. Log Successful Admin Login
+    // 4. Log Successful Admin Login in Audit Trail
     await recordAuditLog({
       action: 'ADMIN_LOGIN',
       entityType: 'AUTH_SESSION',
-      entityId: authData.user.id,
-      metadata: { email: authData.user.email, role: adminCheck.role },
+      entityId: user.id,
+      metadata: { email: user.email, role: adminCheck.role },
     });
 
     return {
       success: true,
-      user: authData.user,
+      user: user,
       session: authData.session,
       adminRole: adminCheck.role,
     };
@@ -179,18 +199,20 @@ export async function getValidatedAdminSession() {
   if (!isSupabaseConfigured()) return null;
 
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error || !session || !session.user) return null;
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return null;
 
-    const adminCheck = await checkAdminUser(session.user.id);
+    const adminCheck = await checkAdminUser(user.id);
     if (!adminCheck.isAdmin) {
       await supabase.auth.signOut();
       return null;
     }
 
+    const { data: { session } } = await supabase.auth.getSession();
+
     return {
       session,
-      user: session.user,
+      user: user,
       adminRole: adminCheck.role,
     };
   } catch (err) {
