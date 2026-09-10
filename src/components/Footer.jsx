@@ -2,7 +2,10 @@ import React from 'react';
 import { Phone, Mail, MapPin, Compass, ShieldCheck, ArrowRight, ExternalLink } from 'lucide-react';
 import { PROPERTY_TYPES } from '../data/properties';
 
-export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry }) {
+export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry, onDoubleClickLogo }) {
+  const footerLogoTimerRef = React.useRef(null);
+  const lastFooterTapRef = React.useRef(0);
+
   const handleCategoryNav = (cat) => {
     setActiveView('properties');
     setActiveCategory(cat);
@@ -14,6 +17,60 @@ export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const triggerAdmin = () => {
+    if (footerLogoTimerRef.current) {
+      clearTimeout(footerLogoTimerRef.current);
+      footerLogoTimerRef.current = null;
+    }
+    if (onDoubleClickLogo) onDoubleClickLogo();
+  };
+
+  const handleFooterLogoClick = (e) => {
+    const now = Date.now();
+    const diff = now - lastFooterTapRef.current;
+    if (diff > 0 && diff < 500) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      lastFooterTapRef.current = 0;
+      triggerAdmin();
+      return;
+    }
+
+    lastFooterTapRef.current = now;
+    if (footerLogoTimerRef.current) {
+      clearTimeout(footerLogoTimerRef.current);
+    }
+    footerLogoTimerRef.current = setTimeout(() => {
+      handleViewNav('home');
+      footerLogoTimerRef.current = null;
+    }, 280);
+  };
+
+  const handleFooterLogoDoubleClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    triggerAdmin();
+  };
+
+  const handleFooterLogoTouchEnd = (e) => {
+    const now = Date.now();
+    const diff = now - lastFooterTapRef.current;
+    if (diff > 0 && diff < 500) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      lastFooterTapRef.current = 0;
+      triggerAdmin();
+      return;
+    }
+    lastFooterTapRef.current = now;
+  };
+
   return (
     <footer className="footer-wrapper">
       <div className="container">
@@ -21,7 +78,14 @@ export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry
         <div className="footer-main-grid">
           {/* Brand Column */}
           <div className="footer-brand-col">
-            <div className="footer-brand" onClick={() => handleViewNav('home')}>
+            <div 
+              className="footer-brand" 
+              onClick={handleFooterLogoClick}
+              onDoubleClick={handleFooterLogoDoubleClick}
+              onTouchEnd={handleFooterLogoTouchEnd}
+              style={{ userSelect: 'none', WebkitUserSelect: 'none', cursor: 'pointer' }}
+              title="Aurelia Luxury Estates (Double-click to open Admin Console)"
+            >
               <div className="brand-icon-wrap">
                 <span className="brand-monogram">A</span>
               </div>

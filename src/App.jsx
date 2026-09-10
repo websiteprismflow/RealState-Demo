@@ -166,15 +166,17 @@ export default function App() {
 
   // Admin Triggers & Authentication Handlers
   const handleLogoDoubleClick = async () => {
+    try {
+      window.history.pushState({}, '', '/admin');
+    } catch {
+      // ignore
+    }
+
     const savedAdminUser = sessionStorage.getItem('aurelia_admin_user');
     const savedAdminRole = sessionStorage.getItem('aurelia_admin_role');
-    const validated = await getValidatedAdminSession();
-    if (validated) {
-      setAuthenticatedAdmin(validated);
-      setIsAdminDashboardOpen(true);
-      setIsAdminLoginOpen(false);
-      sessionStorage.setItem('aurelia_admin_active', 'true');
-    } else if (savedAdminUser && sessionStorage.getItem('aurelia_admin_active') === 'true') {
+    
+    // If already logged in, open dashboard immediately
+    if (savedAdminUser && sessionStorage.getItem('aurelia_admin_active') === 'true') {
       try {
         setAuthenticatedAdmin({
           user: JSON.parse(savedAdminUser),
@@ -183,12 +185,26 @@ export default function App() {
         });
         setIsAdminDashboardOpen(true);
         setIsAdminLoginOpen(false);
+        return;
       } catch {
-        setIsAdminLoginOpen(true);
+        // fallback
       }
-    } else {
-      setIsAdminLoginOpen(true);
-      setIsAdminDashboardOpen(false);
+    }
+
+    // Immediately show Admin Login console for instant feedback
+    setIsAdminLoginOpen(true);
+    setIsAdminDashboardOpen(false);
+
+    try {
+      const validated = await getValidatedAdminSession();
+      if (validated) {
+        setAuthenticatedAdmin(validated);
+        setIsAdminDashboardOpen(true);
+        setIsAdminLoginOpen(false);
+        sessionStorage.setItem('aurelia_admin_active', 'true');
+      }
+    } catch {
+      // keep login panel open
     }
   };
 
@@ -373,6 +389,7 @@ export default function App() {
         setActiveView={setActiveView}
         setActiveCategory={setActiveCategory}
         onOpenInquiry={handleOpenInquiry}
+        onDoubleClickLogo={handleLogoDoubleClick}
       />
 
       {/* Property Detail Modal */}

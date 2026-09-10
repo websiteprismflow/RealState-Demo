@@ -5,26 +5,77 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Mobile double-tap detection on logo & header
+  // Robust Double-click & Double-tap detection for Logo (PC and Mobile)
+  const logoTimerRef = useRef(null);
   const lastLogoTapRef = useRef(0);
   const lastHeaderTapRef = useRef(0);
+
+  const triggerAdminOpen = () => {
+    if (logoTimerRef.current) {
+      clearTimeout(logoTimerRef.current);
+      logoTimerRef.current = null;
+    }
+    if (onDoubleClickLogo) {
+      onDoubleClickLogo();
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    const now = Date.now();
+    const diff = now - lastLogoTapRef.current;
+
+    // If second click happens within 500ms -> it's a double click!
+    if (diff > 0 && diff < 500) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      lastLogoTapRef.current = 0;
+      triggerAdminOpen();
+      return;
+    }
+
+    lastLogoTapRef.current = now;
+
+    // Single click goes home after 280ms debounce if no 2nd click arrives
+    if (logoTimerRef.current) {
+      clearTimeout(logoTimerRef.current);
+    }
+    logoTimerRef.current = setTimeout(() => {
+      handleNavClick('home');
+      logoTimerRef.current = null;
+    }, 280);
+  };
+
+  const handleLogoDoubleClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    triggerAdminOpen();
+  };
 
   const handleLogoTouchEnd = (e) => {
     const now = Date.now();
     const diff = now - lastLogoTapRef.current;
-    if (diff > 0 && diff < 380) {
-      e.preventDefault();
-      if (onDoubleClickLogo) onDoubleClickLogo();
+    if (diff > 0 && diff < 500) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      lastLogoTapRef.current = 0;
+      triggerAdminOpen();
+      return;
     }
     lastLogoTapRef.current = now;
   };
 
   const handleHeaderTouchEnd = (e) => {
-    if (e.target.closest('button') || e.target.closest('a')) return;
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.navbar-brand')) return;
     const now = Date.now();
     const diff = now - lastHeaderTapRef.current;
-    if (diff > 0 && diff < 380) {
-      if (onDoubleClickLogo) onDoubleClickLogo();
+    if (diff > 0 && diff < 450) {
+      triggerAdminOpen();
     }
     lastHeaderTapRef.current = now;
   };
@@ -54,16 +105,14 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
     <header className={`navbar-wrapper ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
         <div className="navbar-inner" onTouchEnd={handleHeaderTouchEnd}>
-          {/* Brand Logo - Single click goes home, Double-click/Double-tap opens Admin Login */}
+          {/* Brand Logo - Double click / Double tap opens Admin console on PC & Mobile */}
           <div 
             className="navbar-brand" 
-            onClick={() => handleNavClick('home')}
-            onDoubleClick={(e) => {
-              e.preventDefault();
-              if (onDoubleClickLogo) onDoubleClickLogo();
-            }}
+            onClick={handleLogoClick}
+            onDoubleClick={handleLogoDoubleClick}
             onTouchEnd={handleLogoTouchEnd}
-            title="Aurelia Luxury Estates (Admin: Double-click or double-tap to access console)"
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', cursor: 'pointer' }}
+            title="Aurelia Luxury Estates (Double-click to open Admin Console)"
           >
             <div className="brand-icon-wrap">
               <span className="brand-monogram">A</span>
