@@ -77,21 +77,24 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      const res = saveInquiry(formData);
+    try {
+      const res = await saveInquiry(formData);
       setIsSubmitting(false);
-      if (res.success) {
+      if (res && res.success) {
         setIsSuccess(true);
       } else {
-        alert('There was a problem submitting your inquiry. Please try again.');
+        alert(res?.error || 'There was a problem submitting your inquiry. Please try again.');
       }
-    }, 700);
+    } catch (err) {
+      console.error('Error in inquiry submission:', err);
+      setIsSubmitting(false);
+      alert('There was a problem submitting your inquiry. Please try again.');
+    }
   };
 
   const handleClearAttachedProperty = () => {
@@ -489,7 +492,7 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
           grid-template-columns: 1fr;
         }
 
-        @media (min-width: 580px) {
+        @media (min-width: 600px) {
           .form-row-2 {
             grid-template-columns: repeat(2, 1fr);
           }
@@ -499,7 +502,7 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
           grid-template-columns: 1fr;
         }
 
-        @media (min-width: 580px) {
+        @media (min-width: 680px) {
           .form-row-3 {
             grid-template-columns: repeat(3, 1fr);
           }
@@ -703,6 +706,59 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+          .inquiry-modal-card {
+            padding: 24px 16px 20px;
+            max-height: 94vh;
+            border-radius: var(--radius-md);
+          }
+
+          .modal-close-btn {
+            top: 14px;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+          }
+
+          .modal-header {
+            margin-bottom: 18px;
+          }
+
+          .modal-headline {
+            font-size: 1.4rem;
+            line-height: 1.25;
+            padding-right: 32px;
+          }
+
+          .modal-subtext {
+            font-size: 0.85rem;
+            line-height: 1.45;
+          }
+
+          .form-input,
+          .form-select,
+          .form-textarea {
+            font-size: 16px;
+            min-height: 44px;
+          }
+
+          .form-row {
+            gap: 12px;
+            margin-bottom: 12px;
+          }
+
+          .form-submit-row {
+            margin-top: 18px;
+            padding-top: 16px;
+            gap: 14px;
+          }
+
+          .submit-btn {
+            width: 100%;
+            justify-content: center;
+          }
         }
       `}</style>
     </div>

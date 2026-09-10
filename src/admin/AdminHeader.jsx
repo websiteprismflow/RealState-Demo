@@ -5,6 +5,21 @@ export default function AdminHeader({ activeTab, onToggleSidebar, onViewCustomer
   const getTabTitle = () => {
     switch (activeTab) {
       case 'dashboard':
+        return 'Dashboard';
+      case 'leads':
+        return 'Leads Engine';
+      case 'properties':
+        return 'Properties';
+      case 'settings':
+        return 'Settings';
+      default:
+        return 'Admin Suite';
+    }
+  };
+
+  const getFullTitle = () => {
+    switch (activeTab) {
+      case 'dashboard':
         return 'Executive Dashboard';
       case 'leads':
         return 'Leads & Inquiry Management';
@@ -29,7 +44,10 @@ export default function AdminHeader({ activeTab, onToggleSidebar, onViewCustomer
           <Menu size={20} />
         </button>
 
-        <h1 className="header-page-title">{getTabTitle()}</h1>
+        <h1 className="header-page-title">
+          <span className="title-desktop">{getFullTitle()}</span>
+          <span className="title-mobile">{getTabTitle()}</span>
+        </h1>
       </div>
 
       <div className="header-right">
@@ -40,7 +58,8 @@ export default function AdminHeader({ activeTab, onToggleSidebar, onViewCustomer
           title="Open Customer-Facing Real Estate Website"
         >
           <ExternalLink size={14} />
-          <span>Customer Website</span>
+          <span className="site-btn-desktop">Customer Website</span>
+          <span className="site-btn-mobile">View Site</span>
         </button>
       </div>
     </header>

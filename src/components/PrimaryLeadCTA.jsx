@@ -153,6 +153,51 @@ export default function PrimaryLeadCTA({ onOpenInquiry }) {
           font-weight: 500;
           color: #E2DDD5;
         }
+
+        @media (max-width: 640px) {
+          .primary-cta-section {
+            padding: 40px 0 70px;
+          }
+
+          .cta-card-luxury {
+            padding: 40px 18px;
+            border-radius: var(--radius-md);
+          }
+
+          .cta-headline {
+            font-size: 1.8rem;
+            line-height: 1.25;
+            margin-bottom: 14px;
+          }
+
+          .cta-subtext {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 26px;
+          }
+
+          .cta-btn-wrap {
+            margin-bottom: 28px;
+          }
+
+          .cta-main-btn {
+            width: 100%;
+            max-width: 340px;
+            justify-content: center;
+          }
+
+          .cta-features-row {
+            flex-direction: column;
+            gap: 12px;
+            padding-top: 20px;
+          }
+
+          .cta-feature-item {
+            font-size: 0.82rem;
+            justify-content: center;
+            text-align: center;
+          }
+        }
       `}</style>
     </section>
   );

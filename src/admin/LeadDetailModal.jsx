@@ -454,6 +454,56 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onStatusChange,
           border-color: #EF9A9A;
           color: #B71C1C;
         }
+
+        @media (max-width: 600px) {
+          .admin-lead-modal-card {
+            padding: 22px 16px;
+            max-height: 92vh;
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            border-radius: var(--radius-md);
+          }
+
+          .lead-modal-client-name {
+            font-size: 1.35rem;
+          }
+
+          .lead-status-action-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            padding: 10px 12px;
+          }
+
+          .status-btns-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+          }
+
+          .status-btn-pill {
+            justify-content: center;
+            padding: 8px 4px;
+            font-size: 0.72rem;
+            gap: 4px;
+          }
+
+          .lead-section-box {
+            padding: 14px;
+          }
+
+          .lead-modal-footer {
+            flex-direction: column-reverse;
+            gap: 10px;
+          }
+
+          .lead-modal-footer button {
+            width: 100%;
+            justify-content: center;
+            min-height: 42px;
+          }
+        }
       `}</style>
     </div>
   );

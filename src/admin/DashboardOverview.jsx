@@ -134,76 +134,135 @@ export default function DashboardOverview({
         </div>
 
         {recentLeads.length > 0 ? (
-          <div className="admin-table-responsive">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Client Name</th>
-                  <th>Phone / Email</th>
-                  <th>Property / Type</th>
-                  <th>Location</th>
-                  <th>Budget</th>
-                  <th>Status</th>
-                  <th>Received Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentLeads.map((lead) => (
-                  <tr key={lead.id}>
-                    <td>
-                      <strong>{lead.name}</strong>
-                    </td>
-                    <td>
-                      <div className="cell-contact">
-                        <span>{lead.phone}</span>
-                        {lead.email && <span className="cell-sub">{lead.email}</span>}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cell-prop">
-                        <span className="font-semibold">{lead.property_type}</span>
-                        {lead.property_title && (
-                          <span className="cell-prop-title" title={lead.property_title}>
-                            {lead.property_title}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cell-location">
-                        <MapPin size={13} className="text-gold" />
-                        <span>{lead.location || 'Any'}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="text-gold font-semibold">{lead.budget || 'Flexible'}</span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${lead.status.toLowerCase()}`}>
-                        {lead.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="cell-date">
-                        {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </td>
-                    <td>
-                      <button 
-                        type="button" 
-                        className="btn-icon-action"
-                        onClick={() => onViewLead(lead)}
-                        title="View Full Lead Details"
-                      >
-                        <Eye size={15} />
-                      </button>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="admin-table-responsive desktop-table-view">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Client Name</th>
+                    <th>Phone / Email</th>
+                    <th>Property / Type</th>
+                    <th>Location</th>
+                    <th>Budget</th>
+                    <th>Status</th>
+                    <th>Received Date</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {recentLeads.map((lead) => (
+                    <tr key={lead.id}>
+                      <td>
+                        <strong>{lead.name}</strong>
+                      </td>
+                      <td>
+                        <div className="cell-contact">
+                          <span>{lead.phone}</span>
+                          {lead.email && <span className="cell-sub">{lead.email}</span>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="cell-prop">
+                          <span className="font-semibold">{lead.property_type}</span>
+                          {lead.property_title && (
+                            <span className="cell-prop-title" title={lead.property_title}>
+                              {lead.property_title}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="cell-location">
+                          <MapPin size={13} className="text-gold" />
+                          <span>{lead.location || 'Any'}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-gold font-semibold">{lead.budget || 'Flexible'}</span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${lead.status.toLowerCase()}`}>
+                          {lead.status}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="cell-date">
+                          {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          type="button" 
+                          className="btn-icon-action"
+                          onClick={() => onViewLead(lead)}
+                          title="View Full Lead Details"
+                        >
+                          <Eye size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards List View */}
+            <div className="admin-mobile-cards-list">
+              {recentLeads.map((lead) => (
+                <div key={lead.id} className="admin-mobile-card" onClick={() => onViewLead(lead)} role="button" tabIndex={0}>
+                  <div className="admin-mobile-card-top">
+                    <div>
+                      <div className="admin-mobile-card-title">{lead.name}</div>
+                      <div className="admin-mobile-card-sub">
+                        {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                    <span className={`status-badge ${lead.status.toLowerCase()}`}>
+                      {lead.status}
+                    </span>
+                  </div>
+
+                  <div className="admin-mobile-card-body">
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Contact:</span>
+                      <span className="admin-mobile-card-val">{lead.phone}</span>
+                    </div>
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Asset Type:</span>
+                      <span className="admin-mobile-card-val">{lead.property_type}</span>
+                    </div>
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Location / Budget:</span>
+                      <span className="admin-mobile-card-val text-gold">{lead.location || 'Any'} • {lead.budget || 'Flexible'}</span>
+                    </div>
+                    {lead.property_title && (
+                      <div className="admin-mobile-card-row">
+                        <span className="admin-mobile-card-lbl">Property:</span>
+                        <span className="admin-mobile-card-val" style={{ maxWidth: '170px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {lead.property_title}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-mobile-card-actions">
+                    <button 
+                      type="button" 
+                      className="btn btn-gold btn-sm w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewLead(lead);
+                      }}
+                    >
+                      <Eye size={15} />
+                      <span>View Lead Dossier</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="admin-empty-table">
             <Users size={32} className="text-muted-light" />
@@ -217,11 +276,11 @@ export default function DashboardOverview({
           background: #FFFFFF;
           border: 1px solid var(--border-subtle);
           border-radius: var(--radius-md);
-          padding: 28px 30px;
+          padding: 24px 28px;
           display: flex;
           flex-direction: column;
-          gap: 20px;
-          margin-bottom: 28px;
+          gap: 16px;
+          margin-bottom: 24px;
           box-shadow: 0 2px 10px rgba(28, 25, 20, 0.03);
         }
 
@@ -230,6 +289,26 @@ export default function DashboardOverview({
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .admin-welcome-banner {
+            padding: 16px 14px;
+            gap: 12px;
+          }
+          .welcome-heading {
+            font-size: 1.3rem;
+          }
+          .welcome-subtext {
+            font-size: 0.82rem;
+          }
+          .banner-actions {
+            width: 100%;
+          }
+          .banner-actions button {
+            width: 100%;
+            justify-content: center;
           }
         }
 

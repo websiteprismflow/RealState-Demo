@@ -82,62 +82,64 @@ export default function LeadsManagement({
             />
           </div>
 
-          {/* Status Filter */}
-          <select 
-            className="admin-filter-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="All">All Statuses ({leads.length})</option>
-            <option value="Pending">Pending Action</option>
-            <option value="Accepted">Accepted Leads</option>
-            <option value="Rejected">Rejected Leads</option>
-          </select>
-
-          {/* Property Type Filter */}
-          <select 
-            className="admin-filter-select"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="All">All Asset Types</option>
-            <option value={PROPERTY_TYPES.RESIDENCE}>Residence</option>
-            <option value={PROPERTY_TYPES.PLOTS}>Plots</option>
-            <option value={PROPERTY_TYPES.COMMERCIAL}>Commercial</option>
-          </select>
-
-          {/* Location Filter */}
-          <select 
-            className="admin-filter-select"
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-          >
-            <option value="All">All Locations</option>
-            {LOCATIONS.map(loc => (
-              <option key={loc.id} value={loc.name}>{loc.name}</option>
-            ))}
-          </select>
-
-          {/* Sort Control */}
-          <select 
-            className="admin-filter-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="newest">Sort: Newest First</option>
-            <option value="oldest">Sort: Oldest First</option>
-          </select>
-
-          {(searchQuery || statusFilter !== 'All' || typeFilter !== 'All' || locationFilter !== 'All') && (
-            <button 
-              type="button" 
-              className="btn btn-outline btn-sm reset-btn"
-              onClick={handleResetFilters}
+          <div className="admin-filters-grid">
+            {/* Status Filter */}
+            <select 
+              className="admin-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <RotateCcw size={14} />
-              <span>Reset</span>
-            </button>
-          )}
+              <option value="All">All Statuses ({leads.length})</option>
+              <option value="Pending">Pending Action</option>
+              <option value="Accepted">Accepted Leads</option>
+              <option value="Rejected">Rejected Leads</option>
+            </select>
+
+            {/* Property Type Filter */}
+            <select 
+              className="admin-filter-select"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="All">All Asset Types</option>
+              <option value={PROPERTY_TYPES.RESIDENCE}>Residence</option>
+              <option value={PROPERTY_TYPES.PLOTS}>Plots</option>
+              <option value={PROPERTY_TYPES.COMMERCIAL}>Commercial</option>
+            </select>
+
+            {/* Location Filter */}
+            <select 
+              className="admin-filter-select"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            >
+              <option value="All">All Locations</option>
+              {LOCATIONS.map(loc => (
+                <option key={loc.id} value={loc.name}>{loc.name}</option>
+              ))}
+            </select>
+
+            {/* Sort Control */}
+            <select 
+              className="admin-filter-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="newest">Sort: Newest First</option>
+              <option value="oldest">Sort: Oldest First</option>
+            </select>
+
+            {(searchQuery || statusFilter !== 'All' || typeFilter !== 'All' || locationFilter !== 'All') && (
+              <button 
+                type="button" 
+                className="btn btn-outline btn-sm reset-btn"
+                onClick={handleResetFilters}
+              >
+                <RotateCcw size={14} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Count Bar */}
@@ -147,114 +149,203 @@ export default function LeadsManagement({
 
         {/* Table or Empty State */}
         {filteredLeads.length > 0 ? (
-          <div className="admin-table-responsive">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Client & Contact</th>
-                  <th>Property Requirement</th>
-                  <th>Location & Budget</th>
-                  <th>Timeline / Purpose</th>
-                  <th>Lead Status</th>
-                  <th>Received Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLeads.map((lead) => (
-                  <tr key={lead.id}>
-                    <td>
-                      <div className="cell-client-info">
-                        <strong className="client-full-name">{lead.name}</strong>
-                        <div className="contact-links-row">
-                          <a href={`tel:${lead.phone}`} className="contact-phone-link">
-                            <Phone size={12} />
-                            <span>{lead.phone}</span>
-                          </a>
-                          {lead.email && (
-                            <a href={`mailto:${lead.email}`} className="contact-email-link" title={lead.email}>
-                              <Mail size={12} />
-                              <span>{lead.email}</span>
+          <>
+            {/* Desktop Table View */}
+            <div className="admin-table-responsive desktop-table-view">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Client & Contact</th>
+                    <th>Property Requirement</th>
+                    <th>Location & Budget</th>
+                    <th>Timeline / Purpose</th>
+                    <th>Lead Status</th>
+                    <th>Received Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLeads.map((lead) => (
+                    <tr key={lead.id}>
+                      <td>
+                        <div className="cell-client-info">
+                          <strong className="client-full-name">{lead.name}</strong>
+                          <div className="contact-links-row">
+                            <a href={`tel:${lead.phone}`} className="contact-phone-link">
+                              <Phone size={12} />
+                              <span>{lead.phone}</span>
                             </a>
+                            {lead.email && (
+                              <a href={`mailto:${lead.email}`} className="contact-email-link" title={lead.email}>
+                                <Mail size={12} />
+                                <span>{lead.email}</span>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <div className="cell-prop-req">
+                          <span className="prop-type-badge">{lead.property_type}</span>
+                          {lead.property_title ? (
+                            <span className="prop-attached-name" title={lead.property_title}>
+                              {lead.property_title}
+                            </span>
+                          ) : (
+                            <span className="prop-general-tag">General Inquiry</span>
                           )}
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td>
-                      <div className="cell-prop-req">
-                        <span className="prop-type-badge">{lead.property_type}</span>
-                        {lead.property_title ? (
-                          <span className="prop-attached-name" title={lead.property_title}>
-                            {lead.property_title}
-                          </span>
-                        ) : (
-                          <span className="prop-general-tag">General Inquiry</span>
-                        )}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div className="cell-loc-budget">
-                        <div className="loc-row">
-                          <MapPin size={12} className="text-gold" />
-                          <span>{lead.location || 'Flexible'}</span>
+                      <td>
+                        <div className="cell-loc-budget">
+                          <div className="loc-row">
+                            <MapPin size={12} className="text-gold" />
+                            <span>{lead.location || 'Flexible'}</span>
+                          </div>
+                          <span className="budget-tag font-semibold text-gold">{lead.budget || 'Flexible'}</span>
                         </div>
-                        <span className="budget-tag font-semibold text-gold">{lead.budget || 'Flexible'}</span>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td>
-                      <div className="cell-timeline-purpose">
-                        <span className="timeline-tag">{lead.timeline || 'Immediate'}</span>
-                        <span className="purpose-tag">{lead.purpose || 'Self Use'}</span>
-                      </div>
-                    </td>
+                      <td>
+                        <div className="cell-timeline-purpose">
+                          <span className="timeline-tag">{lead.timeline || 'Immediate'}</span>
+                          <span className="purpose-tag">{lead.purpose || 'Self Use'}</span>
+                        </div>
+                      </td>
 
-                    <td>
-                      {/* Inline Status Dropdown for Quick Action */}
+                      <td>
+                        {/* Inline Status Dropdown for Quick Action */}
+                        <select 
+                          className={`inline-status-select ${lead.status.toLowerCase()}`}
+                          value={lead.status}
+                          onChange={(e) => onStatusChange(lead.id, e.target.value)}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Accepted">Accepted</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      </td>
+
+                      <td>
+                        <span className="cell-date">
+                          {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="table-actions-cell">
+                          <button 
+                            type="button" 
+                            className="btn-icon-action"
+                            onClick={() => onViewLead(lead)}
+                            title="View Full Lead Dossier"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn-icon-action delete-action"
+                            onClick={() => onDeleteRequest(lead)}
+                            title="Delete Lead"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="admin-mobile-cards-list">
+              {filteredLeads.map((lead) => (
+                <div key={lead.id} className="admin-mobile-card">
+                  <div className="admin-mobile-card-top">
+                    <div>
+                      <div className="admin-mobile-card-title">{lead.name}</div>
+                      <div className="admin-mobile-card-sub">
+                        {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </div>
+                    </div>
+                    <span className={`status-badge ${lead.status.toLowerCase()}`}>
+                      {lead.status}
+                    </span>
+                  </div>
+
+                  <div className="admin-mobile-card-body">
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Phone:</span>
+                      <a href={`tel:${lead.phone}`} className="admin-mobile-card-val text-gold font-semibold" style={{ textDecoration: 'underline' }}>
+                        {lead.phone}
+                      </a>
+                    </div>
+                    {lead.email && (
+                      <div className="admin-mobile-card-row">
+                        <span className="admin-mobile-card-lbl">Email:</span>
+                        <a href={`mailto:${lead.email}`} className="admin-mobile-card-val" style={{ textDecoration: 'underline' }}>
+                          {lead.email}
+                        </a>
+                      </div>
+                    )}
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Requirement:</span>
+                      <span className="admin-mobile-card-val">{lead.property_type}</span>
+                    </div>
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Budget / Loc:</span>
+                      <span className="admin-mobile-card-val text-gold">{lead.budget || 'Flexible'} • {lead.location || 'Any'}</span>
+                    </div>
+                    {lead.property_title && (
+                      <div className="admin-mobile-card-row">
+                        <span className="admin-mobile-card-lbl">Property:</span>
+                        <span className="admin-mobile-card-val" style={{ maxWidth: '170px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {lead.property_title}
+                        </span>
+                      </div>
+                    )}
+                    <div className="admin-mobile-card-row" style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
+                      <span className="admin-mobile-card-lbl">Quick Status:</span>
                       <select 
                         className={`inline-status-select ${lead.status.toLowerCase()}`}
                         value={lead.status}
                         onChange={(e) => onStatusChange(lead.id, e.target.value)}
+                        style={{ minHeight: '34px', fontSize: '0.8rem' }}
                       >
                         <option value="Pending">Pending</option>
                         <option value="Accepted">Accepted</option>
                         <option value="Rejected">Rejected</option>
                       </select>
-                    </td>
+                    </div>
+                  </div>
 
-                    <td>
-                      <span className="cell-date">
-                        {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="table-actions-cell">
-                        <button 
-                          type="button" 
-                          className="btn-icon-action"
-                          onClick={() => onViewLead(lead)}
-                          title="View Full Lead Dossier"
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button 
-                          type="button" 
-                          className="btn-icon-action delete-action"
-                          onClick={() => onDeleteRequest(lead)}
-                          title="Delete Lead"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  <div className="admin-mobile-card-actions" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-gold btn-sm"
+                      onClick={() => onViewLead(lead)}
+                      style={{ justifyContent: 'center' }}
+                    >
+                      <Eye size={15} />
+                      <span>View Dossier</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-outline btn-sm delete-action"
+                      onClick={() => onDeleteRequest(lead)}
+                      title="Delete Lead"
+                      style={{ color: '#C62828', borderColor: '#FFCDD2', padding: '0 12px' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="admin-empty-table">
             <Filter size={36} className="text-muted-light" />

@@ -362,6 +362,12 @@ img {
   overflow-y: auto;
 }
 
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 12px 10px;
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

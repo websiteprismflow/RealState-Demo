@@ -950,6 +950,74 @@ export default function PropertyFormModal({ isOpen, property, onClose, onSave })
           padding-top: 22px;
           border-top: 1px solid var(--border-subtle);
         }
+
+        /* Responsive Form Rows */
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        @media (min-width: 641px) {
+          .form-row-2 {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .form-row-3 {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .admin-property-modal-card {
+            padding: 22px 14px;
+            max-height: 94vh;
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            border-radius: var(--radius-md);
+          }
+
+          .prop-form-title {
+            font-size: 1.35rem;
+          }
+
+          .prop-modal-footer {
+            flex-direction: column-reverse;
+            gap: 10px;
+          }
+
+          .prop-modal-footer button {
+            width: 100%;
+            justify-content: center;
+            min-height: 44px;
+          }
+
+          .amenities-picker-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .images-preview-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .add-bullet-row,
+          .add-custom-amenity-row {
+            flex-direction: column;
+            max-width: 100%;
+          }
+
+          .add-bullet-row button,
+          .add-custom-amenity-row button {
+            width: 100%;
+            justify-content: center;
+            min-height: 42px;
+          }
+
+          .form-input,
+          .form-select,
+          .form-textarea {
+            font-size: 16px !important;
+          }
+        }
       `}</style>
     </div>
   );

@@ -38,9 +38,9 @@ export default function AdminSidebar({
             <div className="brand-icon-wrap">
               <span className="brand-monogram">A</span>
             </div>
-            <div className="brand-text-wrap">
-              <span className="brand-title" style={{ color: '#FFFFFF' }}>AURELIA</span>
-              <span className="brand-tagline">ADMIN CONSOLE</span>
+            <div className="brand-text-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span className="brand-title" style={{ color: '#FFFFFF', letterSpacing: '0.14em', fontSize: '1.25rem', lineHeight: 1.1 }}>AURELIA</span>
+              <span className="brand-tagline" style={{ display: 'block', fontSize: '0.62rem', letterSpacing: '0.14em', color: 'var(--gold-light)' }}>ADMIN CONSOLE</span>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export default function AdminSidebar({
             onClick={onClose}
             aria-label="Close Sidebar"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 

@@ -131,6 +131,29 @@ export default function DeleteConfirmModal({ isOpen, itemType = 'item', itemTitl
           background: #B71C1C;
           box-shadow: 0 4px 14px rgba(198, 40, 40, 0.4);
         }
+
+        @media (max-width: 480px) {
+          .delete-confirm-card {
+            padding: 24px 18px;
+            width: calc(100% - 24px);
+            margin: 12px auto;
+          }
+
+          .delete-title {
+            font-size: 1.15rem;
+          }
+
+          .delete-actions-row {
+            flex-direction: column-reverse;
+            gap: 8px;
+          }
+
+          .delete-actions-row button {
+            width: 100%;
+            min-height: 42px;
+            justify-content: center;
+          }
+        }
       `}</style>
     </div>
   );

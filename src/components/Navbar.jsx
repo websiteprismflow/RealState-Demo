@@ -1,9 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Building2, Compass, PhoneCall, Menu, X, ChevronRight, Home, Landmark, Trees, ShieldCheck, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Building2, Compass, PhoneCall, Menu, X, ChevronRight, Home, Landmark, Trees, ShieldCheck, MapPin, Lock } from 'lucide-react';
 
 export default function Navbar({ activeView, setActiveView, onOpenInquiry, activeCategory, setActiveCategory, onDoubleClickLogo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Mobile double-tap detection on logo & header
+  const lastLogoTapRef = useRef(0);
+  const lastHeaderTapRef = useRef(0);
+
+  const handleLogoTouchEnd = (e) => {
+    const now = Date.now();
+    const diff = now - lastLogoTapRef.current;
+    if (diff > 0 && diff < 380) {
+      e.preventDefault();
+      if (onDoubleClickLogo) onDoubleClickLogo();
+    }
+    lastLogoTapRef.current = now;
+  };
+
+  const handleHeaderTouchEnd = (e) => {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    const now = Date.now();
+    const diff = now - lastHeaderTapRef.current;
+    if (diff > 0 && diff < 380) {
+      if (onDoubleClickLogo) onDoubleClickLogo();
+    }
+    lastHeaderTapRef.current = now;
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,8 +53,8 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
   return (
     <header className={`navbar-wrapper ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
-        <div className="navbar-inner">
-          {/* Brand Logo - Single click goes home, Double-click opens Admin Login */}
+        <div className="navbar-inner" onTouchEnd={handleHeaderTouchEnd}>
+          {/* Brand Logo - Single click goes home, Double-click/Double-tap opens Admin Login */}
           <div 
             className="navbar-brand" 
             onClick={() => handleNavClick('home')}
@@ -38,7 +62,8 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
               e.preventDefault();
               if (onDoubleClickLogo) onDoubleClickLogo();
             }}
-            title="Aurelia Luxury Estates (Admin: Double-click to access console)"
+            onTouchEnd={handleLogoTouchEnd}
+            title="Aurelia Luxury Estates (Admin: Double-click or double-tap to access console)"
           >
             <div className="brand-icon-wrap">
               <span className="brand-monogram">A</span>
@@ -180,6 +205,18 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
                 }}
               >
                 <span>Find My Property →</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="mobile-drawer-admin-btn"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onDoubleClickLogo) onDoubleClickLogo();
+                }}
+              >
+                <Lock size={14} className="text-gold" />
+                <span>Admin Sign In Console (Double-Tap)</span>
               </button>
             </div>
           </div>
@@ -377,6 +414,30 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
           margin-top: 18px;
           padding-top: 16px;
           border-top: 1px solid var(--border-subtle);
+        }
+
+        .mobile-drawer-admin-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          margin-top: 10px;
+          padding: 10px 14px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-muted-warm);
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px dashed rgba(197, 160, 89, 0.4);
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .mobile-drawer-admin-btn:hover {
+          background: #FFFFFF;
+          color: var(--text-charcoal-primary);
+          border-style: solid;
         }
 
         .w-full {

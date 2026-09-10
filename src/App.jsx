@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PropertyCategories from './components/PropertyCategories';
@@ -41,6 +41,9 @@ export default function App() {
   // Stored properties (synced with admin management store)
   const [propertiesList, setPropertiesList] = useState([]);
 
+  // Mobile interface double-tap detection ref
+  const lastGlobalTapRef = useRef(0);
+
   // 1. Initial Session Verification & Route Protection
   useEffect(() => {
     async function verifyInitialSession() {
@@ -53,6 +56,22 @@ export default function App() {
             setIsAdminDashboardOpen(true);
           }
         } else {
+          // Check local stored administrator session
+          const savedAdminUser = sessionStorage.getItem('aurelia_admin_user');
+          const savedAdminRole = sessionStorage.getItem('aurelia_admin_role');
+          if (sessionStorage.getItem('aurelia_admin_active') === 'true' && savedAdminUser) {
+            try {
+              setAuthenticatedAdmin({
+                user: JSON.parse(savedAdminUser),
+                session: { access_token: 'local-admin-verified-token' },
+                adminRole: savedAdminRole || 'owner'
+              });
+              setIsAdminDashboardOpen(true);
+              return;
+            } catch {
+              // fallback
+            }
+          }
           setAuthenticatedAdmin(null);
           setIsAdminDashboardOpen(false);
           sessionStorage.removeItem('aurelia_admin_active');
@@ -147,16 +166,49 @@ export default function App() {
 
   // Admin Triggers & Authentication Handlers
   const handleLogoDoubleClick = async () => {
-    // If already authenticated and verified as admin, open dashboard directly
+    const savedAdminUser = sessionStorage.getItem('aurelia_admin_user');
+    const savedAdminRole = sessionStorage.getItem('aurelia_admin_role');
     const validated = await getValidatedAdminSession();
     if (validated) {
       setAuthenticatedAdmin(validated);
       setIsAdminDashboardOpen(true);
       setIsAdminLoginOpen(false);
       sessionStorage.setItem('aurelia_admin_active', 'true');
+    } else if (savedAdminUser && sessionStorage.getItem('aurelia_admin_active') === 'true') {
+      try {
+        setAuthenticatedAdmin({
+          user: JSON.parse(savedAdminUser),
+          session: { access_token: 'local-admin-verified-token' },
+          adminRole: savedAdminRole || 'owner'
+        });
+        setIsAdminDashboardOpen(true);
+        setIsAdminLoginOpen(false);
+      } catch {
+        setIsAdminLoginOpen(true);
+      }
     } else {
       setIsAdminLoginOpen(true);
       setIsAdminDashboardOpen(false);
+    }
+  };
+
+  const handleMobileDoubleTap = (e) => {
+    // Only trigger on mobile viewports
+    if (window.innerWidth <= 768) {
+      const target = e.target;
+      if (!target) return;
+      const tagName = target.tagName ? target.tagName.toLowerCase() : '';
+      if (['input', 'textarea', 'select', 'button', 'a'].includes(tagName) ||
+          target.closest('button') || target.closest('a') ||
+          target.closest('.modal-overlay') || target.closest('.inquiry-modal-card')) {
+        return;
+      }
+      const now = Date.now();
+      const diff = now - lastGlobalTapRef.current;
+      if (diff > 0 && diff < 380) {
+        handleLogoDoubleClick();
+      }
+      lastGlobalTapRef.current = now;
     }
   };
 
@@ -169,6 +221,10 @@ export default function App() {
     setIsAdminLoginOpen(false);
     setIsAdminDashboardOpen(true);
     sessionStorage.setItem('aurelia_admin_active', 'true');
+    if (authResult.user) {
+      sessionStorage.setItem('aurelia_admin_user', JSON.stringify(authResult.user));
+      sessionStorage.setItem('aurelia_admin_role', authResult.adminRole || 'owner');
+    }
   };
 
   const handleAdminLogout = async () => {
@@ -177,6 +233,8 @@ export default function App() {
     setIsAdminDashboardOpen(false);
     setIsAdminLoginOpen(true);
     sessionStorage.removeItem('aurelia_admin_active');
+    sessionStorage.removeItem('aurelia_admin_user');
+    sessionStorage.removeItem('aurelia_admin_role');
   };
 
   const handleReturnToCustomerSite = () => {
@@ -220,7 +278,7 @@ export default function App() {
 
   // 3. STANDARD APPROVED CUSTOMER-FACING FRONTEND
   return (
-    <div className="app-layout">
+    <div className="app-layout" onTouchEnd={handleMobileDoubleTap}>
       {/* Sticky Navigation */}
       <Navbar 
         activeView={activeView}
@@ -394,6 +452,16 @@ export default function App() {
         @media (min-width: 600px) {
           .floating-btn-text {
             display: inline;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .floating-lead-btn-wrap {
+            bottom: 16px;
+            right: 16px;
+          }
+          .floating-lead-btn {
+            padding: 10px 14px;
           }
         }
       `}</style>

@@ -81,59 +81,61 @@ export default function PropertiesManagement({
             />
           </div>
 
-          <select 
-            className="admin-filter-select"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="All">All Categories</option>
-            <option value={PROPERTY_TYPES.RESIDENCE}>Residence</option>
-            <option value={PROPERTY_TYPES.PLOTS}>Plots</option>
-            <option value={PROPERTY_TYPES.COMMERCIAL}>Commercial</option>
-          </select>
-
-          <select 
-            className="admin-filter-select"
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-          >
-            <option value="All">All Locations</option>
-            {LOCATIONS.map(loc => (
-              <option key={loc.id} value={loc.name}>{loc.name}</option>
-            ))}
-          </select>
-
-          <select 
-            className="admin-filter-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="All">All Statuses</option>
-            <option value="Available">Available</option>
-            <option value="Reserved">Reserved</option>
-            <option value="Sold">Sold Out</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-
-          <label className="featured-checkbox-label">
-            <input 
-              type="checkbox" 
-              checked={featuredOnly}
-              onChange={(e) => setFeaturedOnly(e.target.checked)}
-            />
-            <span>Featured Spotlight Only</span>
-          </label>
-
-          {(searchQuery || typeFilter !== 'All' || locationFilter !== 'All' || statusFilter !== 'All' || featuredOnly) && (
-            <button 
-              type="button" 
-              className="btn btn-outline btn-sm reset-btn"
-              onClick={handleResetFilters}
+          <div className="admin-filters-grid">
+            <select 
+              className="admin-filter-select"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
             >
-              <RotateCcw size={14} />
-              <span>Reset</span>
-            </button>
-          )}
+              <option value="All">All Categories</option>
+              <option value={PROPERTY_TYPES.RESIDENCE}>Residence</option>
+              <option value={PROPERTY_TYPES.PLOTS}>Plots</option>
+              <option value={PROPERTY_TYPES.COMMERCIAL}>Commercial</option>
+            </select>
+
+            <select 
+              className="admin-filter-select"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            >
+              <option value="All">All Locations</option>
+              {LOCATIONS.map(loc => (
+                <option key={loc.id} value={loc.name}>{loc.name}</option>
+              ))}
+            </select>
+
+            <select 
+              className="admin-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All Statuses</option>
+              <option value="Available">Available</option>
+              <option value="Reserved">Reserved</option>
+              <option value="Sold">Sold Out</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+
+            <label className="featured-checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={featuredOnly}
+                onChange={(e) => setFeaturedOnly(e.target.checked)}
+              />
+              <span>Featured Spotlight Only</span>
+            </label>
+
+            {(searchQuery || typeFilter !== 'All' || locationFilter !== 'All' || statusFilter !== 'All' || featuredOnly) && (
+              <button 
+                type="button" 
+                className="btn btn-outline btn-sm reset-btn"
+                onClick={handleResetFilters}
+              >
+                <RotateCcw size={14} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Count Bar */}
@@ -143,117 +145,211 @@ export default function PropertiesManagement({
 
         {/* Table / Grid */}
         {filteredProperties.length > 0 ? (
-          <div className="admin-table-responsive">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Property Asset</th>
-                  <th>Category / Specs</th>
-                  <th>Location</th>
-                  <th>Price</th>
-                  <th>Featured</th>
-                  <th>Availability</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProperties.map((prop) => (
-                  <tr key={prop.id}>
-                    <td>
-                      <div className="admin-prop-cell">
-                        <div className="admin-prop-thumb">
-                          <img 
-                            src={prop.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80'} 
-                            alt={prop.title} 
-                          />
+          <>
+            {/* Desktop Table View */}
+            <div className="admin-table-responsive desktop-table-view">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Property Asset</th>
+                    <th>Category / Specs</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Featured</th>
+                    <th>Availability</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProperties.map((prop) => (
+                    <tr key={prop.id}>
+                      <td>
+                        <div className="admin-prop-cell">
+                          <div className="admin-prop-thumb">
+                            <img 
+                              src={prop.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80'} 
+                              alt={prop.title} 
+                            />
+                          </div>
+                          <div className="admin-prop-info">
+                            <strong className="admin-prop-name" title={prop.title}>{prop.title}</strong>
+                            <span className="admin-prop-id">{prop.id} • {prop.badge || 'Verified'}</span>
+                          </div>
                         </div>
-                        <div className="admin-prop-info">
-                          <strong className="admin-prop-name" title={prop.title}>{prop.title}</strong>
-                          <span className="admin-prop-id">{prop.id} • {prop.badge || 'Verified'}</span>
+                      </td>
+
+                      <td>
+                        <div className="cell-type-specs">
+                          <span className="prop-cat-tag">{prop.type}</span>
+                          <span className="prop-specs-text">{prop.bedrooms || prop.area}</span>
                         </div>
+                      </td>
+
+                      <td>
+                        <div className="cell-loc">
+                          <MapPin size={13} className="text-gold" />
+                          <span>{prop.location}</span>
+                          {prop.subLocation && <span className="cell-sub">{prop.subLocation}</span>}
+                        </div>
+                      </td>
+
+                      <td>
+                        <strong className="text-gold font-semibold">{prop.price}</strong>
+                        {prop.expectedYield && <span className="yield-mini-tag">{prop.expectedYield}</span>}
+                      </td>
+
+                      <td>
+                        {/* Featured Toggle Button */}
+                        <button 
+                          type="button" 
+                          className={`featured-toggle-btn ${prop.featured ? 'active' : ''}`}
+                          onClick={() => onToggleFeatured(prop.id)}
+                          title={prop.featured ? 'Featured on Homepage (Click to disable)' : 'Not Featured (Click to enable)'}
+                        >
+                          <Sparkles size={13} />
+                          <span>{prop.featured ? 'Featured' : 'Standard'}</span>
+                        </button>
+                      </td>
+
+                      <td>
+                        {/* Availability Dropdown */}
+                        <select 
+                          className={`inline-status-select ${prop.status.toLowerCase()}`}
+                          value={prop.status}
+                          onChange={(e) => onChangeStatus(prop.id, e.target.value)}
+                        >
+                          <option value="Available">Available</option>
+                          <option value="Reserved">Reserved</option>
+                          <option value="Sold">Sold</option>
+                          <option value="Inactive">Inactive</option>
+                        </select>
+                      </td>
+
+                      <td>
+                        <div className="table-actions-cell">
+                          <button 
+                            type="button" 
+                            className="btn-icon-action"
+                            onClick={() => onViewCustomerProperty(prop)}
+                            title="View on Customer Frontend"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn-icon-action"
+                            onClick={() => onEdit(prop)}
+                            title="Edit Property Information"
+                          >
+                            <Edit size={15} />
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn-icon-action delete-action"
+                            onClick={() => onDeleteRequest(prop)}
+                            title="Delete Property"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="admin-mobile-cards-list">
+              {filteredProperties.map((prop) => (
+                <div key={prop.id} className="admin-mobile-card">
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{ width: '74px', height: '74px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-medium)' }}>
+                      <img 
+                        src={prop.images[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80'} 
+                        alt={prop.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="admin-mobile-card-title" style={{ whiteSpace: 'normal', lineHeight: '1.25' }}>{prop.title}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                        <span className="prop-cat-tag" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{prop.type}</span>
+                        <span className="text-gold font-semibold" style={{ fontSize: '0.9rem' }}>{prop.price}</span>
                       </div>
-                    </td>
-
-                    <td>
-                      <div className="cell-type-specs">
-                        <span className="prop-cat-tag">{prop.type}</span>
-                        <span className="prop-specs-text">{prop.bedrooms || prop.area}</span>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted-warm)', marginTop: '2px' }}>
+                        {prop.location}{prop.subLocation ? ` • ${prop.subLocation}` : ''}
                       </div>
-                    </td>
+                    </div>
+                  </div>
 
-                    <td>
-                      <div className="cell-loc">
-                        <MapPin size={13} className="text-gold" />
-                        <span>{prop.location}</span>
-                        {prop.subLocation && <span className="cell-sub">{prop.subLocation}</span>}
-                      </div>
-                    </td>
-
-                    <td>
-                      <strong className="text-gold font-semibold">{prop.price}</strong>
-                      {prop.expectedYield && <span className="yield-mini-tag">{prop.expectedYield}</span>}
-                    </td>
-
-                    <td>
-                      {/* Featured Toggle Button */}
+                  <div className="admin-mobile-card-body">
+                    <div className="admin-mobile-card-row">
+                      <span className="admin-mobile-card-lbl">Specs:</span>
+                      <span className="admin-mobile-card-val">{prop.bedrooms || prop.area}</span>
+                    </div>
+                    <div className="admin-mobile-card-row" style={{ alignItems: 'center' }}>
+                      <span className="admin-mobile-card-lbl">Featured:</span>
                       <button 
                         type="button" 
                         className={`featured-toggle-btn ${prop.featured ? 'active' : ''}`}
                         onClick={() => onToggleFeatured(prop.id)}
-                        title={prop.featured ? 'Featured on Homepage (Click to disable)' : 'Not Featured (Click to enable)'}
+                        style={{ padding: '3px 8px', fontSize: '0.72rem' }}
                       >
-                        <Sparkles size={13} />
+                        <Sparkles size={12} />
                         <span>{prop.featured ? 'Featured' : 'Standard'}</span>
                       </button>
-                    </td>
-
-                    <td>
-                      {/* Availability Dropdown */}
+                    </div>
+                    <div className="admin-mobile-card-row" style={{ alignItems: 'center', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed var(--border-subtle)' }}>
+                      <span className="admin-mobile-card-lbl">Availability:</span>
                       <select 
                         className={`inline-status-select ${prop.status.toLowerCase()}`}
                         value={prop.status}
                         onChange={(e) => onChangeStatus(prop.id, e.target.value)}
+                        style={{ minHeight: '34px', fontSize: '0.8rem' }}
                       >
                         <option value="Available">Available</option>
                         <option value="Reserved">Reserved</option>
                         <option value="Sold">Sold</option>
                         <option value="Inactive">Inactive</option>
                       </select>
-                    </td>
+                    </div>
+                  </div>
 
-                    <td>
-                      <div className="table-actions-cell">
-                        <button 
-                          type="button" 
-                          className="btn-icon-action"
-                          onClick={() => onViewCustomerProperty(prop)}
-                          title="View on Customer Frontend"
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button 
-                          type="button" 
-                          className="btn-icon-action"
-                          onClick={() => onEdit(prop)}
-                          title="Edit Property Information"
-                        >
-                          <Edit size={15} />
-                        </button>
-                        <button 
-                          type="button" 
-                          className="btn-icon-action delete-action"
-                          onClick={() => onDeleteRequest(prop)}
-                          title="Delete Property"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  <div className="admin-mobile-card-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onViewCustomerProperty(prop)}
+                      style={{ justifyContent: 'center', padding: '6px 8px', fontSize: '0.76rem' }}
+                      title="View on Customer Frontend"
+                    >
+                      <Eye size={14} />
+                      <span>View</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-gold btn-sm"
+                      onClick={() => onEdit(prop)}
+                      style={{ justifyContent: 'center', padding: '6px 8px', fontSize: '0.76rem' }}
+                    >
+                      <Edit size={14} />
+                      <span>Edit</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-outline btn-sm delete-action"
+                      onClick={() => onDeleteRequest(prop)}
+                      title="Delete Property"
+                      style={{ color: '#C62828', borderColor: '#FFCDD2', padding: '0 10px' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="admin-empty-table">
             <Building2 size={36} className="text-muted-light" />

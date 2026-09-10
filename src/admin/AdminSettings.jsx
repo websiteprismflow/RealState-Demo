@@ -291,6 +291,19 @@ export default function AdminSettings({ onShowToast }) {
           color: var(--text-muted-warm);
           line-height: 1.5;
         }
+
+        @media (max-width: 600px) {
+          .settings-form button {
+            width: 100%;
+            justify-content: center;
+            min-height: 44px;
+          }
+
+          .database-phase-banner {
+            flex-direction: column;
+            gap: 12px;
+          }
+        }
       `}</style>
     </div>
   );
