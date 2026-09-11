@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ShieldAlert } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import DashboardOverview from './DashboardOverview';
@@ -8,6 +9,7 @@ import PropertiesManagement from './PropertiesManagement';
 import PropertyFormModal from './PropertyFormModal';
 import AdminSettings from './AdminSettings';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import DemoNoticeModal from './DemoNoticeModal';
 import Toast from './Toast';
 import { getSavedInquiries, fetchLiveLeads, updateLeadStatus, deleteLead } from '../data/inquiries';
 import { getStoredProperties, fetchLiveProperties, saveNewProperty, updateExistingProperty, deleteExistingProperty } from '../data/propertyStore';
@@ -34,6 +36,13 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
     itemTitle: ''
   });
 
+  // Demo Showcase Notice State (Blocks persists on confirm)
+  const [demoNotice, setDemoNotice] = useState({
+    isOpen: false,
+    title: 'Demo Showcase Notice',
+    message: 'This is a demo, so no changes are saved.'
+  });
+
   // Toast Notification State
   const [toast, setToast] = useState({ message: '', type: 'success' });
 
@@ -58,8 +67,17 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
     setToast({ message, type });
   };
 
+  const handleShowDemoNotice = (message = 'This is a demo, so no changes are saved.', title = 'Demo Showcase Notice') => {
+    setDemoNotice({
+      isOpen: true,
+      title,
+      message
+    });
+  };
+
   // Lead Actions
   const handleStatusChange = async (leadId, newStatus) => {
+    // Status can be updated by admin as allowed by requirements
     const res = await updateLeadStatus(leadId, newStatus);
     if (res.success) {
       setLeads(res.leads);
@@ -81,28 +99,14 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
     });
   };
 
-  const handleConfirmDelete = async () => {
-    if (deleteModal.itemType === 'lead') {
-      const res = await deleteLead(deleteModal.itemId);
-      if (res.success) {
-        setLeads(res.leads);
-        if (selectedLead && selectedLead.id === deleteModal.itemId) {
-          setSelectedLead(null);
-        }
-        showToast('Lead permanently deleted.');
-      } else {
-        showToast(res.error || 'Failed to delete lead.', 'error');
-      }
-    } else if (deleteModal.itemType === 'property') {
-      const res = await deleteExistingProperty(deleteModal.itemId);
-      if (res.success) {
-        setProperties(res.properties);
-        showToast('Property permanently removed from catalog.');
-      } else {
-        showToast(res.error || 'Failed to delete property.', 'error');
-      }
-    }
+  const handleConfirmDelete = () => {
+    const itemTypeLabel = deleteModal.itemType === 'lead' ? 'client lead' : 'property listing';
+    // Close delete confirm modal and display demo notice screen
     setDeleteModal({ isOpen: false, itemType: 'lead', itemId: null, itemTitle: '' });
+    handleShowDemoNotice(
+      `This is a demo, so no changes or deletions are saved. The ${itemTypeLabel} has been kept unchanged.`,
+      'Demo Showcase Notice'
+    );
   };
 
   // Property Actions
@@ -125,49 +129,25 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
     });
   };
 
-  const handleSavePropertyForm = async (formData) => {
-    if (editingProperty) {
-      // Update existing
-      const res = await updateExistingProperty(editingProperty.id, formData);
-      if (res.success) {
-        setProperties(res.properties);
-        setPropertyFormOpen(false);
-        setEditingProperty(null);
-        showToast('Property updated successfully.');
-      } else {
-        showToast(res.error || 'Failed to update property.', 'error');
-      }
-    } else {
-      // Add new
-      const res = await saveNewProperty(formData);
-      if (res.success) {
-        setProperties(res.properties);
-        setPropertyFormOpen(false);
-        showToast('New property created successfully.');
-      } else {
-        showToast(res.error || 'Failed to create property.', 'error');
-      }
-    }
+  const handleSavePropertyForm = (formData) => {
+    // Admin can edit and change things in form, but after confirming show demo notice screen
+    const isEdit = Boolean(editingProperty);
+    setPropertyFormOpen(false);
+    setEditingProperty(null);
+    handleShowDemoNotice(
+      isEdit 
+        ? 'This is a demo, so no changes to property details are saved.' 
+        : 'This is a demo, so new property listings are not saved.',
+      'Demo Showcase Notice'
+    );
   };
 
-  const handleToggleFeatured = async (propertyId) => {
-    const prop = properties.find(p => p.id === propertyId);
-    if (prop) {
-      const newFeatured = !prop.featured;
-      const res = await updateExistingProperty(propertyId, { featured: newFeatured });
-      if (res.success) {
-        setProperties(res.properties);
-        showToast(`Property ${newFeatured ? 'marked as Featured' : 'removed from Featured spotlight'}.`);
-      }
-    }
+  const handleToggleFeatured = (propertyId) => {
+    handleShowDemoNotice('This is a demo, so featured spotlight changes are not saved.', 'Demo Showcase Notice');
   };
 
-  const handleChangePropertyStatus = async (propertyId, newStatus) => {
-    const res = await updateExistingProperty(propertyId, { status: newStatus });
-    if (res.success) {
-      setProperties(res.properties);
-      showToast(`Property status updated to "${newStatus}".`);
-    }
+  const handleChangePropertyStatus = (propertyId, newStatus) => {
+    handleShowDemoNotice('This is a demo, so property status changes are not saved.', 'Demo Showcase Notice');
   };
 
   const pendingCount = leads.filter(l => l.status === 'Pending').length;
@@ -196,6 +176,17 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
         />
 
         <div className="admin-main-container">
+          {/* Global Demo Disclaimer Banner */}
+          <div className="admin-demo-disclaimer-banner">
+            <ShieldAlert size={20} className="text-gold flex-shrink-0" />
+            <div className="admin-demo-disclaimer-content">
+              <strong className="disclaimer-bold">DEMO SHOWCASE ENVIRONMENT:</strong>
+              <span>
+                All client leads, customer contacts, emails, property assets, and addresses displayed in this Admin Panel are 100% fictional / fake and only showcased for demonstration purposes.
+              </span>
+            </div>
+          </div>
+
           {activeTab === 'dashboard' && (
             <DashboardOverview 
               leads={leads}
@@ -228,7 +219,11 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
           )}
 
           {activeTab === 'settings' && (
-            <AdminSettings onShowToast={showToast} adminUser={adminUser} />
+            <AdminSettings 
+              onShowToast={showToast} 
+              onShowDemoNotice={handleShowDemoNotice}
+              adminUser={adminUser} 
+            />
           )}
         </div>
       </div>
@@ -257,6 +252,14 @@ export default function AdminDashboard({ onLogout, onViewCustomerSite, onViewCus
         itemTitle={deleteModal.itemTitle}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteModal({ isOpen: false, itemType: 'lead', itemId: null, itemTitle: '' })}
+      />
+
+      {/* Demo Notice Screen / Modal (Appears after confirming any edit/addition/deletion) */}
+      <DemoNoticeModal 
+        isOpen={demoNotice.isOpen}
+        title={demoNotice.title}
+        message={demoNotice.message}
+        onClose={() => setDemoNotice({ isOpen: false, title: 'Demo Showcase Notice', message: '' })}
       />
 
       {/* Toast Notifications */}

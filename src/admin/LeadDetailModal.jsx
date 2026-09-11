@@ -30,6 +30,9 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onStatusChange,
             <Calendar size={14} className="text-muted-light" />
             <span>Submitted on {new Date(lead.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</span>
           </div>
+          <div className="lead-readonly-badge" style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(197, 160, 89, 0.12)', border: '1px solid rgba(197, 160, 89, 0.3)', padding: '4px 10px', borderRadius: '4px', fontSize: '0.78rem', color: '#8C6D23', fontWeight: 600 }}>
+            <span>Fictional Demo Record (Simulated Client Inquiry • Status Can Be Changed)</span>
+          </div>
         </div>
 
         {/* Status Action Switcher Bar */}

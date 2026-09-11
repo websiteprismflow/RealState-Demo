@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Building2, Compass, PhoneCall, Menu, X, ChevronRight, Home, Landmark, Trees, ShieldCheck, MapPin, Lock } from 'lucide-react';
 
-export default function Navbar({ activeView, setActiveView, onOpenInquiry, activeCategory, setActiveCategory, onDoubleClickLogo }) {
+export default function Navbar({ activeView, setActiveView, onOpenInquiry, activeCategory, setActiveCategory, onDoubleClickLogo, onOpenAdmin }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -167,6 +167,17 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
             >
               Investments
             </button>
+            <button 
+              className="nav-link nav-admin-link"
+              onClick={() => {
+                if (onOpenAdmin) onOpenAdmin();
+                else if (onDoubleClickLogo) onDoubleClickLogo();
+              }}
+              title="Open Admin Console"
+            >
+              <Lock size={13} style={{ marginRight: '5px', verticalAlign: '-1px' }} />
+              Admin Panel
+            </button>
           </nav>
 
           {/* Primary Action Button */}
@@ -243,6 +254,17 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
             >
               <ShieldCheck size={18} />
               <span>Investment Opportunities</span>
+            </button>
+            <button 
+              className="mobile-nav-item mobile-nav-admin-item"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenAdmin) onOpenAdmin();
+                else if (onDoubleClickLogo) onDoubleClickLogo();
+              }}
+            >
+              <Lock size={18} className="text-gold" />
+              <span>Admin Panel</span>
             </button>
 
             <div className="mobile-drawer-cta">

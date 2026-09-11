@@ -23,18 +23,18 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
     try {
       const trimmedEmail = email.trim().toLowerCase();
 
-      // 1. Direct verify for admin credentials: admin@gmail.com / admin123
-      if (trimmedEmail === 'admin@gmail.com' && password === 'admin123') {
+      // 1. Direct verify for admin credentials: xyz.admin@demo-showcase.xyz / admin123 (or admin@gmail.com)
+      if ((trimmedEmail === 'xyz.admin@demo-showcase.xyz' || trimmedEmail === 'admin@gmail.com') && password === 'admin123') {
         const adminPayload = {
           success: true,
           user: {
             id: 'admin-super-001',
-            email: 'admin@gmail.com',
-            user_metadata: { name: 'Master Administrator' }
+            email: 'xyz.admin@demo-showcase.xyz',
+            user_metadata: { name: 'Master Administrator XYZ' }
           },
           session: {
             access_token: 'local-admin-verified-token',
-            user: { id: 'admin-super-001', email: 'admin@gmail.com' }
+            user: { id: 'admin-super-001', email: 'xyz.admin@demo-showcase.xyz' }
           },
           adminRole: 'owner'
         };
@@ -104,7 +104,7 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
             <div className="admin-demo-creds">
               <div className="admin-demo-row">
                 <span className="admin-demo-lbl">Email:</span>
-                <code className="admin-demo-val">admin@gmail.com</code>
+                <code className="admin-demo-val">xyz.admin@demo-showcase.xyz</code>
               </div>
               <div className="admin-demo-row">
                 <span className="admin-demo-lbl">Password:</span>
@@ -115,7 +115,7 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
               type="button" 
               className="admin-fill-btn"
               onClick={() => {
-                setEmail('admin@gmail.com');
+                setEmail('xyz.admin@demo-showcase.xyz');
                 setPassword('admin123');
                 setError('');
               }}

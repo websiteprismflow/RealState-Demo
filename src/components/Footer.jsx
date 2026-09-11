@@ -178,30 +178,30 @@ export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry
             <div className="footer-contact-item">
               <MapPin size={16} className="footer-contact-icon" />
               <div>
-                <strong>Gurgaon Advisory Suite:</strong>
-                <p>Level 8, Two Horizon Centre, Golf Course Road, DLF Phase 5, Gurgaon 122002</p>
+                <strong>Demo Advisory Suite:</strong>
+                <p>Tower XYZ, Level 00, Demo Luxury Hub, Fictional Zone 000000</p>
               </div>
             </div>
 
             <div className="footer-contact-item">
               <MapPin size={16} className="footer-contact-icon" />
               <div>
-                <strong>Delhi Private Office:</strong>
-                <p>Barakhamba Road, Connaught Place, New Delhi 110001</p>
+                <strong>Demo Showcase Office:</strong>
+                <p>Suite XYZ, Fictional Boulevard, Demo City 000000</p>
               </div>
             </div>
 
             <div className="footer-contact-item">
               <Phone size={16} className="footer-contact-icon" />
               <div>
-                <a href="tel:+911244589000" className="contact-link">+91 124 458 9000 / +91 98110 00000</a>
+                <span className="contact-link">+91 00000 00000 (Demo Unreal Contact)</span>
               </div>
             </div>
 
             <div className="footer-contact-item">
               <Mail size={16} className="footer-contact-icon" />
               <div>
-                <a href="mailto:advisory@aureliaestates.com" className="contact-link">advisory@aureliaestates.com</a>
+                <span className="contact-link">xyz.advisory@demo-showcase.xyz</span>
               </div>
             </div>
           </div>

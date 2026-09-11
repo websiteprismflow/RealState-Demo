@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Bell, ShieldCheck, Database, Save, Check } from 'lucide-react';
 
-export default function AdminSettings({ onShowToast }) {
+export default function AdminSettings({ onShowToast, onShowDemoNotice }) {
   const [profile, setProfile] = useState({
-    name: 'Senior Managing Partner',
-    email: 'admin@gmail.com',
-    phone: '+91 124 458 9000',
+    name: 'Administrator XYZ (Demo Profile)',
+    email: 'xyz.admin@demo-showcase.xyz',
+    phone: '+91 00000 00000',
     role: 'Super Administrator'
   });
 
@@ -18,12 +18,20 @@ export default function AdminSettings({ onShowToast }) {
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-    onShowToast('Profile settings saved successfully.');
+    if (onShowDemoNotice) {
+      onShowDemoNotice('This is a demo, so no profile settings changes are saved.', 'Demo Showcase Notice');
+    } else {
+      onShowToast('This is a demo, so no changes are saved.', 'info');
+    }
   };
 
   const handleSavePassword = (e) => {
     e.preventDefault();
-    onShowToast('Password updated successfully.');
+    if (onShowDemoNotice) {
+      onShowDemoNotice('This is a demo, so no password changes are saved.', 'Demo Showcase Notice');
+    } else {
+      onShowToast('This is a demo, so no changes are saved.', 'info');
+    }
   };
 
   return (

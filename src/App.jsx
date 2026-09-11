@@ -303,6 +303,7 @@ export default function App() {
         setActiveCategory={setActiveCategory}
         onOpenInquiry={handleOpenInquiry}
         onDoubleClickLogo={handleLogoDoubleClick}
+        onOpenAdmin={handleLogoDoubleClick}
       />
 
       {/* Main View Router */}

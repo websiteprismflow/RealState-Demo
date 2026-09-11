@@ -32,6 +32,9 @@ export default function PrimaryLeadCTA({ onOpenInquiry }) {
                 <span>Tell Us Your Requirements</span>
                 <ArrowRight size={18} />
               </button>
+              <div className="cta-demo-note" style={{ marginTop: '12px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.02em' }}>
+                <span style={{ color: '#C5A059', fontWeight: 600 }}>DEMO SHOWCASE:</span> This website is just for showcase. No personal data is collected or stored.
+              </div>
             </div>
 
             {/* Quick Guarantees */}

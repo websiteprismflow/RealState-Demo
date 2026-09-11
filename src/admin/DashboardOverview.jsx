@@ -25,7 +25,7 @@ export default function DashboardOverview({
           <div className="eyebrow eyebrow-no-line text-gold">Executive Summary</div>
           <h1 className="welcome-heading">Welcome back, Administrator</h1>
           <p className="welcome-subtext">
-            Here is a real-time overview of customer inquiries, lead conversions, and your active luxury property catalog.
+            Demo Showcase Overview: All client inquiries, phone contacts, emails, and properties shown below are fictional demo records created for showcase purposes.
           </p>
         </div>
 

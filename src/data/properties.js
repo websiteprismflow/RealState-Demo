@@ -64,11 +64,11 @@ export const LOCATIONS = [
 export const PROPERTIES_DATA = [
   {
     id: 'prop-101',
-    title: 'The Solitaire Sky Villa — Golf Course Road',
+    title: 'The Solitaire Sky Villa — XYZ Demo Boulevard',
     type: PROPERTY_TYPES.RESIDENCE,
     categoryKey: 'residence',
     location: 'Gurgaon',
-    subLocation: 'Golf Course Road, DLF Phase 5',
+    subLocation: 'XYZ Luxury Corridor, Sector 000, Fictional Zone',
     price: '₹ 8.75 Cr',
     priceRaw: 87500000,
     area: '4,650 sq.ft',
@@ -84,7 +84,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'An architectural marvel perched high above the prestigious Golf Course Road. Offering panoramic 270-degree skyline views, double-height living ceilings, imported Italian Statuario marble, a private heated splash pool, and dedicated private elevator foyer access.',
+    description: 'An architectural marvel perched high above the prestigious XYZ Demo Boulevard. Offering panoramic 270-degree skyline views, double-height living ceilings, imported Italian Statuario marble, a private heated splash pool, and dedicated private elevator foyer access.',
     features: [
       'Private High-Speed Elevator with Biometric Access',
       'Triple Height 22ft Living Room Ceiling',
@@ -106,11 +106,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-102',
-    title: 'Oakwood Plotted Enclave — Sector 88A',
+    title: 'Oakwood Plotted Enclave — Sector XYZ',
     type: PROPERTY_TYPES.PLOTS,
     categoryKey: 'plots',
     location: 'Gurgaon',
-    subLocation: 'Dwarka Expressway & Pataudi Rd Junction',
+    subLocation: 'Plot XYZ, Demo Expressway Avenue, Fictional Corridor',
     price: '₹ 2.40 Cr',
     priceRaw: 24000000,
     area: '250 sq.yd (2,250 sq.ft)',
@@ -125,7 +125,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1524813686514-a57563d77d61?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'Gated, boutique plotted development along the booming Dwarka Expressway corridor. Fully DTCP approved with underground power grid, landscaped avenues, 40-foot wide tree-lined internal roads, and permission for Stilt + 4 floors construction.',
+    description: 'Gated, boutique plotted development along the booming XYZ Demo Expressway corridor. Fully DTCP approved with underground power grid, landscaped avenues, 40-foot wide tree-lined internal roads, and permission for Stilt + 4 floors construction.',
     features: [
       '100% Clear Title & DTCP Approved',
       'Stilt + 4 Floors Permitted with Independent Registry',
@@ -147,11 +147,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-103',
-    title: 'The Capital Apex — Cyber City Corporate Suites',
+    title: 'The Capital Apex — XYZ Corporate Suites',
     type: PROPERTY_TYPES.COMMERCIAL,
     categoryKey: 'commercial',
     location: 'Gurgaon',
-    subLocation: 'DLF Cyber City / NH-48 Corridor',
+    subLocation: 'Tower XYZ, Cyber Demo Zone, Fictional City',
     price: '₹ 4.25 Cr',
     priceRaw: 42500000,
     area: '2,800 sq.ft Lockable Office',
@@ -188,11 +188,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-104',
-    title: 'The Grand Ambassador Manor — South Delhi',
+    title: 'The Grand Ambassador Manor — XYZ Enclave',
     type: PROPERTY_TYPES.RESIDENCE,
     categoryKey: 'residence',
     location: 'Delhi',
-    subLocation: 'Vasant Vihar Diplomatic Enclave',
+    subLocation: 'XYZ Diplomatic Enclave, Fictional Sector 999',
     price: '₹ 19.50 Cr',
     priceRaw: 195000000,
     area: '6,200 sq.ft Floor Plate',
@@ -207,7 +207,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'An iconic address in the heart of Diplomatic South Delhi. Designed for dignitaries and connoisseurs of timeless luxury. Features a grand entry foyer, French windows looking out onto landscaped gardens, German Poggenpohl kitchen, and bespoke Dornbracht bath fixtures.',
+    description: 'An iconic showcase address in the fictional XYZ Diplomatic Enclave. Designed for dignitaries and connoisseurs of timeless luxury. Features a grand entry foyer, French windows looking out onto landscaped gardens, German Poggenpohl kitchen, and bespoke Dornbracht bath fixtures.',
     features: [
       'Corner Plot with 80ft Wide Frontage',
       'Private Stilt Car Parking for 4 Large Sedans',
@@ -229,11 +229,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-105',
-    title: 'The Horizon Plotted Boulevard — GT Road',
+    title: 'The Horizon Plotted Boulevard — XYZ Highway',
     type: PROPERTY_TYPES.PLOTS,
     categoryKey: 'plots',
     location: 'Panipat',
-    subLocation: 'Main GT Karnal Road Corridor',
+    subLocation: 'Plot XYZ-00, GT Demo Highway, Unreal Sector',
     price: '₹ 85 Lakh',
     priceRaw: 8500000,
     area: '180 sq.yd (1,620 sq.ft)',
@@ -248,7 +248,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1524813686514-a57563d77d61?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'A masterplanned 50-acre integrated plotted township positioned along the National Highway 44. Ideal for high ROI plot investments or building a bespoke independent villa away from urban chaos yet connected by high-speed express corridors.',
+    description: 'A masterplanned 50-acre integrated plotted showcase township positioned along the fictional GT Demo Highway corridor. Ideal for high ROI plot investments or building a bespoke independent villa away from urban chaos.',
     features: [
       'DTCP Haryana License Approved',
       'All Underground Infrastructure (No overhead wires)',
@@ -270,11 +270,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-106',
-    title: 'Elysian Golf Residences — Sector 128',
+    title: 'Elysian Golf Residences — Sector XYZ',
     type: PROPERTY_TYPES.RESIDENCE,
     categoryKey: 'residence',
     location: 'Noida',
-    subLocation: 'Noida-Greater Noida Expressway',
+    subLocation: 'Sector XYZ, Fictional Expressway Boulevard',
     price: '₹ 4.10 Cr',
     priceRaw: 41000000,
     area: '3,450 sq.ft',
@@ -289,7 +289,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'Overlooking the signature 18-hole Graham Cooke golf course on Noida Expressway. Expansive open-plan living with continuous wrap-around glass balustrades, offering soothing greens and total serenity minutes from the capital.',
+    description: 'Overlooking the signature 18-hole golf course in Sector XYZ, Fictional Expressway Boulevard. Expansive open-plan living with continuous wrap-around glass balustrades, offering soothing greens and total serenity minutes from the capital.',
     features: [
       'Uninterrupted 180° Golf Course Views',
       'Double Height Grand Lobby with Italian Marble',
@@ -311,11 +311,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-107',
-    title: 'Avenue 62 High-Street Retail & Dining',
+    title: 'Avenue 62 High-Street Retail & Dining — Sector XYZ',
     type: PROPERTY_TYPES.COMMERCIAL,
     categoryKey: 'commercial',
     location: 'Noida',
-    subLocation: 'Sector 62 Institutional & Retail Hub',
+    subLocation: 'Block XYZ, Fictional High-Street Commercial Hub',
     price: '₹ 1.95 Cr',
     priceRaw: 19500000,
     area: '950 sq.ft High-Footfall Retail',
@@ -330,7 +330,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'An open-to-sky experiential retail destination catering to over 200,000 working corporate professionals and high-density residential towers in Sector 62. Double height frontage suitable for luxury fashion, restaurants, or anchor brands.',
+    description: 'An open-to-sky experiential retail destination in Block XYZ, Fictional Commercial Hub catering to corporate professionals and high-density residential towers. Double height frontage suitable for luxury fashion, restaurants, or anchor brands.',
     features: [
       '18ft Clear Floor-to-Ceiling Retail Height (Mezzanine feasible)',
       'Direct Visibility from Main 45-Meter Sector Road',
@@ -352,11 +352,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-108',
-    title: 'The Orchard Estate Villa — Sector 9',
+    title: 'The Orchard Estate Villa — Sector XYZ',
     type: PROPERTY_TYPES.RESIDENCE,
     categoryKey: 'residence',
     location: 'Chandigarh',
-    subLocation: 'Sector 9, Prime Heritage Belt',
+    subLocation: 'Villa XYZ, Serene Demo Boulevard, Sector 00',
     price: '₹ 14.20 Cr',
     priceRaw: 142000000,
     area: '5,800 sq.ft Built-Up',
@@ -371,7 +371,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600566753104-685f4f24cb4d?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'A bespoke 1-Kanal villa inspired by Le Corbusier modernism combined with warm contemporary minimalist interiors. Features a private courtyard, reflective water mirror, solar glass windows, and mature manicured lawns.',
+    description: 'A bespoke 1-Kanal demo villa situated on Villa XYZ, Serene Demo Boulevard. Features a private courtyard, reflective water mirror, solar glass windows, and mature manicured lawns.',
     features: [
       '1 Kanal (500 sq.yd) Freehold Land with Clear Ownership',
       'Double Glazed Floor-to-Ceiling Glass Walls',
@@ -393,11 +393,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-109',
-    title: 'Yamuna Aerocity Commercial Plaza',
+    title: 'Yamuna Aerocity Commercial Plaza — Sector XYZ',
     type: PROPERTY_TYPES.COMMERCIAL,
     categoryKey: 'commercial',
     location: 'Greater Noida',
-    subLocation: 'Sector 22D, Yamuna Expressway (Near Jewar Airport)',
+    subLocation: 'Plot XYZ-77, Yamuna Demo Expressway, Aerotropolis Zone',
     price: '₹ 3.10 Cr',
     priceRaw: 31000000,
     area: '1,850 sq.ft Commercial Space',
@@ -412,7 +412,7 @@ export const PROPERTIES_DATA = [
       'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
     ],
-    description: 'Located strategically on the 100-meter Yamuna Expressway corridor only 15 minutes from the upcoming Noida International Airport (Jewar). An unparalleled high-potential asset tailored for early-mover investors seeking multi-fold capital appreciation.',
+    description: 'Located strategically on Plot XYZ-77, Yamuna Demo Expressway corridor. An unparalleled high-potential asset tailored for early-mover investors seeking multi-fold capital appreciation.',
     features: [
       'Located on 100-meter Wide Expressway Service Corridor',
       '15 Minutes from Jewar International Airport',
@@ -434,11 +434,11 @@ export const PROPERTIES_DATA = [
   },
   {
     id: 'prop-110',
-    title: 'Emerald Pine Estate Plots — New Chandigarh',
+    title: 'Emerald Pine Estate Plots — Sector XYZ',
     type: PROPERTY_TYPES.PLOTS,
     categoryKey: 'plots',
     location: 'Chandigarh',
-    subLocation: 'Mullanpur, New Chandigarh Corridor',
+    subLocation: 'Mullanpur Corridor, Sector XYZ, Fictional Foothills',
     price: '₹ 1.65 Cr',
     priceRaw: 16500000,
     area: '300 sq.yd (2,700 sq.ft)',

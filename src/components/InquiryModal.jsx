@@ -82,19 +82,11 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
     if (!validate()) return;
 
     setIsSubmitting(true);
-    try {
-      const res = await saveInquiry(formData);
+    // Showcase Demo: No data is sent or stored
+    setTimeout(() => {
       setIsSubmitting(false);
-      if (res && res.success) {
-        setIsSuccess(true);
-      } else {
-        alert(res?.error || 'There was a problem submitting your inquiry. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error in inquiry submission:', err);
-      setIsSubmitting(false);
-      alert('There was a problem submitting your inquiry. Please try again.');
-    }
+      setIsSuccess(true);
+    }, 400);
   };
 
   const handleClearAttachedProperty = () => {
@@ -123,20 +115,22 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
         </button>
 
         {isSuccess ? (
-          /* SUCCESS STATE */
+          /* SUCCESS STATE: DEMO NOTICE */
           <div className="success-state-box animate-fade-in">
             <div className="success-icon-wrap">
-              <CheckCircle2 size={48} className="text-gold" />
+              <ShieldCheck size={48} className="text-gold" />
             </div>
-            <div className="eyebrow">Request Received</div>
-            <h2 className="success-title">Thank You</h2>
+            <div className="demo-confirmation-pill">
+              <span>DEMO SHOWCASE NOTICE</span>
+            </div>
+            <h2 className="success-title">No Data Is Stored</h2>
             <p className="success-desc">
-              Your requirements have been successfully registered with our senior advisory desk. A dedicated property specialist will contact you shortly with tailored recommendations.
+              This website is just for showcase and demonstration purposes. No personal details, phone numbers, or inquiry data are collected, saved, or transmitted.
             </p>
 
             {formData.property_title && (
               <div className="success-prop-tag">
-                <span className="success-prop-lbl">Associated Property:</span>
+                <span className="success-prop-lbl">Associated Property (Showcase):</span>
                 <span className="success-prop-val">{formData.property_title}</span>
               </div>
             )}
@@ -147,7 +141,7 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
                 className="btn btn-gold btn-lg w-full"
                 onClick={onClose}
               >
-                <span>Continue Exploring Properties</span>
+                <span>Return to Showcase</span>
               </button>
             </div>
           </div>
@@ -162,8 +156,17 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
               </div>
               <h2 className="modal-headline">Tell Us Your Requirements</h2>
               <p className="modal-subtext">
-                Complete this quick consultation brief and our advisory desk will curate matching verified properties for you.
+                Complete this consultation brief to test the interactive advisory interface.
               </p>
+            </div>
+
+            {/* DEMO NOTICE BANNER DIRECTLY NEAR THE FORM */}
+            <div className="demo-showcase-notice-banner">
+              <ShieldCheck size={20} className="text-gold flex-shrink-0" />
+              <div>
+                <strong className="demo-banner-title">DEMO — SHOWCASE ONLY:</strong>
+                <span className="demo-banner-text"> This website is just for showcase. No data is collected or stored from this form.</span>
+              </div>
             </div>
 
             {/* Attached Property Pill if triggered from a specific property */}
@@ -419,6 +422,45 @@ export default function InquiryModal({ isOpen, onClose, initialData = null }) {
           font-size: 0.92rem;
           color: var(--text-muted-warm);
           line-height: 1.5;
+        }
+
+        .demo-showcase-notice-banner {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(197, 160, 89, 0.12);
+          border: 1px solid rgba(197, 160, 89, 0.4);
+          border-radius: var(--radius-sm);
+          padding: 12px 16px;
+          margin-bottom: 20px;
+          text-align: left;
+        }
+
+        .demo-banner-title {
+          font-family: var(--font-sans);
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--color-gold-dark, #8C6D23);
+          letter-spacing: 0.05em;
+          margin-right: 6px;
+        }
+
+        .demo-banner-text {
+          font-size: 0.85rem;
+          color: var(--text-charcoal-primary);
+          line-height: 1.4;
+        }
+
+        .demo-confirmation-pill {
+          display: inline-block;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: var(--color-gold-dark, #8C6D23);
+          background: rgba(197, 160, 89, 0.15);
+          padding: 4px 14px;
+          border-radius: 20px;
+          margin-bottom: 12px;
         }
 
         .attached-property-banner {

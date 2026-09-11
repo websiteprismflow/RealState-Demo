@@ -13,7 +13,13 @@ export function getStoredProperties() {
       localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(PROPERTIES_DATA));
       return PROPERTIES_DATA;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // If cache has old non-XYZ addresses, reset to clean XYZ demo assets
+    if (parsed.length > 0 && !parsed[0].subLocation?.includes('XYZ')) {
+      localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(PROPERTIES_DATA));
+      return PROPERTIES_DATA;
+    }
+    return parsed;
   } catch (err) {
     console.error('Error reading properties from storage:', err);
     return PROPERTIES_DATA;
@@ -21,44 +27,10 @@ export function getStoredProperties() {
 }
 
 /**
- * Fetches live properties from Supabase `public.properties`
- * Falls back to default catalog if table is empty or offline
+ * Returns demo properties catalog with fictional XYZ addresses
  */
 export async function fetchLiveProperties() {
-  if (!isSupabaseConfigured()) {
-    return getStoredProperties();
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.warn('[Properties] Supabase query notice:', error.message);
-      return getStoredProperties();
-    }
-
-    if (data && data.length > 0) {
-      // Normalize schema fields if required
-      const normalized = data.map(item => ({
-        ...item,
-        images: Array.isArray(item.images) ? item.images : (item.images ? [item.images] : []),
-        videos: Array.isArray(item.videos) ? item.videos : [],
-        features: Array.isArray(item.features) ? item.features : [],
-        amenities: Array.isArray(item.amenities) ? item.amenities : [],
-      }));
-
-      localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(normalized));
-      return normalized;
-    }
-
-    return getStoredProperties();
-  } catch (err) {
-    console.error('[Properties] Fetch error:', err);
-    return getStoredProperties();
-  }
+  return getStoredProperties();
 }
 
 /**

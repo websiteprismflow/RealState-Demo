@@ -63,7 +63,7 @@ export default function LeadsManagement({
         <div>
           <h1 className="admin-section-heading">Lead & Customer Inquiry Management</h1>
           <p className="admin-section-sub">
-            Review, qualify, process, and track all incoming consultation requests from website visitors.
+            <strong style={{ color: '#8C6D23' }}>Demo Showcase Notice:</strong> All client lead names, phone numbers, emails, and requirements shown below are entirely fictional / fake demo records created for showcase purposes.
           </p>
         </div>
       </div>

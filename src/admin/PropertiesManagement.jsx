@@ -54,7 +54,7 @@ export default function PropertiesManagement({
         <div>
           <h1 className="admin-section-heading">Property Inventory Management</h1>
           <p className="admin-section-sub">
-            Maintain, curate, and update all luxury estates, plot corridors, and commercial portfolios across North India.
+            <strong style={{ color: '#8C6D23' }}>Demo Showcase Notice:</strong> All property listings, addresses, and specifications displayed below are fictional / fake demo assets curated strictly for demonstration purposes.
           </p>
         </div>
 
