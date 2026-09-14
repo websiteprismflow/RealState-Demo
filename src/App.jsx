@@ -12,6 +12,8 @@ import PrimaryLeadCTA from './components/PrimaryLeadCTA';
 import Footer from './components/Footer';
 import InquiryModal from './components/InquiryModal';
 import PropertyDetailModal from './components/PropertyDetailModal';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import TermsConditionsModal from './components/TermsConditionsModal';
 import PropertiesCatalog from './views/PropertiesCatalog';
 import LocationsView from './views/LocationsView';
 import InvestmentsView from './views/InvestmentsView';
@@ -37,6 +39,8 @@ export default function App() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [inquiryInitialData, setInquiryInitialData] = useState(null);
+  const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
   // Stored properties (synced with admin management store)
   const [propertiesList, setPropertiesList] = useState([]);
@@ -391,6 +395,8 @@ export default function App() {
         setActiveCategory={setActiveCategory}
         onOpenInquiry={handleOpenInquiry}
         onDoubleClickLogo={handleLogoDoubleClick}
+        onOpenPrivacyPolicy={() => setIsPrivacyPolicyOpen(true)}
+        onOpenTermsConditions={() => setIsTermsModalOpen(true)}
       />
 
       {/* Property Detail Modal */}
@@ -406,6 +412,18 @@ export default function App() {
         isOpen={inquiryModalOpen}
         onClose={() => setInquiryModalOpen(false)}
         initialData={inquiryInitialData}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal 
+        isOpen={isPrivacyPolicyOpen}
+        onClose={() => setIsPrivacyPolicyOpen(false)}
+      />
+
+      {/* Terms & Conditions Modal */}
+      <TermsConditionsModal 
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
       />
 
       {/* Floating Lead Action Trigger */}

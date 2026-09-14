@@ -2,7 +2,7 @@ import React from 'react';
 import { Phone, Mail, MapPin, Compass, ShieldCheck, ArrowRight, ExternalLink } from 'lucide-react';
 import { PROPERTY_TYPES } from '../data/properties';
 
-export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry, onDoubleClickLogo }) {
+export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry, onDoubleClickLogo, onOpenPrivacyPolicy, onOpenTermsConditions }) {
   const footerLogoTimerRef = React.useRef(null);
   const lastFooterTapRef = React.useRef(0);
 
@@ -214,9 +214,9 @@ export default function Footer({ setActiveView, setActiveCategory, onOpenInquiry
           </div>
 
           <div className="footer-legal-links">
-            <span className="legal-item">Privacy Policy</span>
+            <span className="legal-item" onClick={() => onOpenPrivacyPolicy && onOpenPrivacyPolicy()} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpenPrivacyPolicy && onOpenPrivacyPolicy()}>Privacy Policy</span>
             <span className="legal-sep">•</span>
-            <span className="legal-item">Terms & Conditions</span>
+            <span className="legal-item" onClick={() => onOpenTermsConditions && onOpenTermsConditions()} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpenTermsConditions && onOpenTermsConditions()}>Terms & Conditions</span>
             <span className="legal-sep">•</span>
             <span className="legal-item">RERA Disclaimers</span>
           </div>
