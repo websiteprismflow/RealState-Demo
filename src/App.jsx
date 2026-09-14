@@ -45,9 +45,6 @@ export default function App() {
   // Stored properties (synced with admin management store)
   const [propertiesList, setPropertiesList] = useState([]);
 
-  // Mobile interface double-tap detection ref
-  const lastGlobalTapRef = useRef(0);
-
   // 1. Initial Session Verification & Route Protection
   useEffect(() => {
     async function verifyInitialSession() {
@@ -212,25 +209,6 @@ export default function App() {
     }
   };
 
-  const handleMobileDoubleTap = (e) => {
-    // Only trigger on mobile viewports
-    if (window.innerWidth <= 768) {
-      const target = e.target;
-      if (!target) return;
-      const tagName = target.tagName ? target.tagName.toLowerCase() : '';
-      if (['input', 'textarea', 'select', 'button', 'a'].includes(tagName) ||
-          target.closest('button') || target.closest('a') ||
-          target.closest('.modal-overlay') || target.closest('.inquiry-modal-card')) {
-        return;
-      }
-      const now = Date.now();
-      const diff = now - lastGlobalTapRef.current;
-      if (diff > 0 && diff < 380) {
-        handleLogoDoubleClick();
-      }
-      lastGlobalTapRef.current = now;
-    }
-  };
 
   const handleAdminLoginSuccess = (authResult) => {
     setAuthenticatedAdmin({
@@ -298,7 +276,7 @@ export default function App() {
 
   // 3. STANDARD APPROVED CUSTOMER-FACING FRONTEND
   return (
-    <div className="app-layout" onTouchEnd={handleMobileDoubleTap}>
+    <div className="app-layout">
       {/* Sticky Navigation */}
       <Navbar 
         activeView={activeView}

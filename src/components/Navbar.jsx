@@ -7,44 +7,56 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
 
   // Robust Double-click & Double-tap detection for Logo (PC and Mobile)
   const logoTimerRef = useRef(null);
-  const lastLogoTapRef = useRef(0);
-  const lastHeaderTapRef = useRef(0);
+  const lastLogoTouchRef = useRef(0);
 
   const triggerAdminOpen = () => {
     if (logoTimerRef.current) {
       clearTimeout(logoTimerRef.current);
       logoTimerRef.current = null;
     }
-    if (onDoubleClickLogo) {
+    if (onOpenAdmin) {
+      onOpenAdmin();
+    } else if (onDoubleClickLogo) {
       onDoubleClickLogo();
     }
   };
 
-  const handleLogoClick = (e) => {
+  // Mobile Touch handling on Logo (Double Tap)
+  const handleLogoTouchEnd = (e) => {
     const now = Date.now();
-    const diff = now - lastLogoTapRef.current;
+    const diff = now - lastLogoTouchRef.current;
 
-    // If second click happens within 500ms -> it's a double click!
-    if (diff > 0 && diff < 500) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // If tapped twice within 450ms -> Double tap on logo!
+    if (diff > 0 && diff < 450) {
+      if (logoTimerRef.current) {
+        clearTimeout(logoTimerRef.current);
+        logoTimerRef.current = null;
       }
-      lastLogoTapRef.current = 0;
+      lastLogoTouchRef.current = 0;
+      if (e.cancelable) e.preventDefault();
       triggerAdminOpen();
       return;
     }
 
-    lastLogoTapRef.current = now;
+    lastLogoTouchRef.current = now;
 
-    // Single click goes home after 280ms debounce if no 2nd click arrives
+    // Single tap on mobile goes home after 350ms if no 2nd tap follows
     if (logoTimerRef.current) {
       clearTimeout(logoTimerRef.current);
     }
     logoTimerRef.current = setTimeout(() => {
       handleNavClick('home');
       logoTimerRef.current = null;
-    }, 280);
+    }, 350);
+  };
+
+  // Mouse handling on Logo (Desktop)
+  const handleLogoClick = (e) => {
+    // Prevent synthetic mouse click right after touch event
+    if (Date.now() - lastLogoTouchRef.current < 600 && lastLogoTouchRef.current > 0) {
+      return;
+    }
+    handleNavClick('home');
   };
 
   const handleLogoDoubleClick = (e) => {
@@ -53,31 +65,6 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
       e.stopPropagation();
     }
     triggerAdminOpen();
-  };
-
-  const handleLogoTouchEnd = (e) => {
-    const now = Date.now();
-    const diff = now - lastLogoTapRef.current;
-    if (diff > 0 && diff < 500) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      lastLogoTapRef.current = 0;
-      triggerAdminOpen();
-      return;
-    }
-    lastLogoTapRef.current = now;
-  };
-
-  const handleHeaderTouchEnd = (e) => {
-    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.navbar-brand')) return;
-    const now = Date.now();
-    const diff = now - lastHeaderTapRef.current;
-    if (diff > 0 && diff < 450) {
-      triggerAdminOpen();
-    }
-    lastHeaderTapRef.current = now;
   };
 
   useEffect(() => {
@@ -104,15 +91,15 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
   return (
     <header className={`navbar-wrapper ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
-        <div className="navbar-inner" onTouchEnd={handleHeaderTouchEnd}>
-          {/* Brand Logo - Double click / Double tap opens Admin console on PC & Mobile */}
+        <div className="navbar-inner">
+          {/* Brand Logo - Double click on PC or Double tap on Mobile opens Admin */}
           <div 
             className="navbar-brand" 
             onClick={handleLogoClick}
             onDoubleClick={handleLogoDoubleClick}
             onTouchEnd={handleLogoTouchEnd}
-            style={{ userSelect: 'none', WebkitUserSelect: 'none', cursor: 'pointer' }}
-            title="Aurelia Luxury Estates (Double-click to open Admin Console)"
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', cursor: 'pointer', touchAction: 'manipulation' }}
+            title="Aurelia Luxury Estates (Double-tap to open Admin)"
           >
             <div className="brand-icon-wrap">
               <span className="brand-monogram">A</span>
@@ -256,11 +243,11 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
               <span>Investment Opportunities</span>
             </button>
             <button 
+              type="button"
               className="mobile-nav-item mobile-nav-admin-item"
               onClick={() => {
                 setMobileMenuOpen(false);
-                if (onOpenAdmin) onOpenAdmin();
-                else if (onDoubleClickLogo) onDoubleClickLogo();
+                triggerAdminOpen();
               }}
             >
               <Lock size={18} className="text-gold" />
@@ -269,6 +256,7 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
 
             <div className="mobile-drawer-cta">
               <button 
+                type="button"
                 className="btn btn-gold btn-lg w-full"
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -283,11 +271,11 @@ export default function Navbar({ activeView, setActiveView, onOpenInquiry, activ
                 className="mobile-drawer-admin-btn"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  if (onDoubleClickLogo) onDoubleClickLogo();
+                  triggerAdminOpen();
                 }}
               >
                 <Lock size={14} className="text-gold" />
-                <span>Admin Sign In Console (Double-Tap)</span>
+                <span>Admin Panel</span>
               </button>
             </div>
           </div>
